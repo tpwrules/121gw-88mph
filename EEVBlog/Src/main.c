@@ -66,9 +66,6 @@ SD_HandleTypeDef hsd;
 HAL_SD_CardInfoTypedef SDCardInfo;
 DMA_HandleTypeDef hdma_sd_mmc;
 
-TIM_HandleTypeDef htim2;
-TIM_HandleTypeDef htim3;
-
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -84,8 +81,6 @@ static void MX_LCD_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC_Init(void);
-static void MX_TIM2_Init(void);
-static void MX_TIM3_Init(void);
 static void MX_RTC_Init(void);
 
 /* USER CODE BEGIN PFP */
@@ -132,8 +127,6 @@ int main(void)
   MX_FATFS_Init();
   MX_USART2_UART_Init();
   MX_ADC_Init();
-  MX_TIM2_Init();
-  MX_TIM3_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
@@ -328,70 +321,6 @@ static void MX_SDIO_SD_Init(void)
 
 }
 
-/* TIM2 init function */
-static void MX_TIM2_Init(void)
-{
-
-  TIM_ClockConfigTypeDef sClockSourceConfig;
-  TIM_MasterConfigTypeDef sMasterConfig;
-
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 0;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
-
-/* TIM3 init function */
-static void MX_TIM3_Init(void)
-{
-
-  TIM_ClockConfigTypeDef sClockSourceConfig;
-  TIM_MasterConfigTypeDef sMasterConfig;
-
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 0;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
-
 /* USART2 init function */
 static void MX_USART2_UART_Init(void)
 {
@@ -449,8 +378,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, HW_AMP_CTL_Pin|SYS_BUZZER_Pin|HW_SHDN_A_Pin|SCH_UNCONNECTED_A_Pin 
-                          |HW_LED_CK_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, HW_AMP_CTL_Pin|SYS_BUZZER_Pin|SYS_BACKLIGHT_Pin|HW_SHDN_A_Pin 
+                          |SCH_UNCONNECTED_A_Pin|HW_LED_CK_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RTC_CE_GPIO_Port, RTC_CE_Pin, GPIO_PIN_SET);
@@ -463,7 +392,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(HY_DI_GPIO_Port, HY_DI_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, SYS_BACKLIGHT_Pin|HW_PWR_CTL_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(HW_PWR_CTL_GPIO_Port, HW_PWR_CTL_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(HW_VA_CTL_GPIO_Port, HW_VA_CTL_Pin, GPIO_PIN_RESET);
