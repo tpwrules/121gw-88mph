@@ -1,7 +1,8 @@
 ## Introduction
 Welcome to 88mph, the unofficial firmware for the [EEVBlog 121GW](https://www.eevblog.com/product/121gw/) multimeter. This project aims to make available the full functionality of the meter, while prioritizing understandability, usability, and hackability.
 
-*"If my programming is correct, when this meter reaches 88mph, you're going to measure some serious s#!t!"* ~ Doc Brown (paraphrased)
+*"If my programming is correct, when this meter reaches 88mph, you're going to measure some serious s#!t!"*<br />
+~ Doc Brown (paraphrased)
 
 **DISCLAIMER:** If you intend to use this firmware in situations where an incorrect or misleading reading could put you or others at risk of injury or financial loss, then this is not the firmware for you. Please use the official firmware, or another meter entirely.
 
