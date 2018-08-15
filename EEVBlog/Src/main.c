@@ -106,6 +106,19 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
+  // the bootloader leaves a mess which we need to clean up
+  {
+    // reset all peripherals
+    HAL_DeInit();
+    // disable and un-pend all NVIC interrupts
+    for (int i=0; i<=2; i++) {
+      NVIC->ICER[i] = 0xFFFFFFFF;
+      NVIC->ICPR[i] = 0xFFFFFFFF;
+    }
+    // relocate vector table to us instead of the bootloader
+    SCB->VTOR = 0x8006000;
+  }
+
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
