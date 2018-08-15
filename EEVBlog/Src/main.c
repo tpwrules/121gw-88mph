@@ -53,6 +53,11 @@
 
 /* USER CODE BEGIN Includes */
 
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "hardware/lcd.h"
+
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -129,6 +134,10 @@ int main(void)
   MX_ADC_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
+
+  lcd_put_str(true, "hello");
+  lcd_put_str(false, "world");
+  lcd_update();
 
   /* USER CODE END 2 */
 
