@@ -53,12 +53,7 @@
 
 /* USER CODE BEGIN Includes */
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "hardware/lcd.h"
-#include "hardware/hy3131.h"
-#include "hardware/gpio.h"
+#include "88mph.h"
 
 /* USER CODE END Includes */
 
@@ -150,21 +145,7 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
-  // turn on measurement digital source
-  GPIO_PINSET(HW_PWR_CTL);
-  // turn on 4V analog source
-  GPIO_PINSET(HW_PWR_CTL2);
-
-  lcd_put_str(true, "hello");
-  lcd_put_str(false, "world");
-  lcd_update();
-
-  static const uint8_t regs[20] =
-     {   0,   0,0x13,0x8A,   5,0x40,   0,0x4D,0x31,   1,
-     0x22,   0,   0,0x90,0x28,0xA0,0x80,0xC7,   0,0x20};
-
-  // set up DC5V mode in HY
-  hy_write_regs(0x20, 20, regs);
+  main_88mph();
 
   /* USER CODE END 2 */
 
@@ -176,32 +157,6 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
-    // read AD1 value
-    uint8_t ad1_buf[3];
-    hy_read_regs(HY_REG_AD1_DATA, 3, ad1_buf);
-    int32_t ad1 = ad1_buf[2] << 16 | ad1_buf[1] << 8 | ad1_buf[0];
-    // do 24->32 bit sign extension
-    if (ad1 & 0x800000) {
-      ad1 |= 0xFF000000;
-    }
-
-    // apply approximate calibration figure
-    ad1 /= 60;
-
-    // too lazy to deal with negative/>5 digit numbers
-    if (ad1 < 0 || ad1 > 99999)
-      ad1 = 0;
-
-    // use plain ascii to write to screen
-    char num_str[30];
-    sprintf(num_str, "%05ld", ad1);
-    lcd_put_str(false, num_str);
-
-    // flush screen changes and wait a bit before
-    // reading sample register again
-    lcd_update();
-    HAL_Delay(100);
 
   }
   /* USER CODE END 3 */
