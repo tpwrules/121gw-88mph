@@ -27,6 +27,8 @@
 
 #include "lcd_segments.h"
 
+#include "acquisition/reading.h"
+
 extern uint32_t lcd_segment_buffer[8];
 
 // define the digits on the screen for lcd_set_char
@@ -62,11 +64,17 @@ void lcd_update();
 #define LCD_SEGSET(seg, val)\
     (val ? LCD_SEGON(seg) : LCD_SEGOFF(seg))
 
+// clear all the units and powers on the selected screen
+void lcd_clear_units_powers(lcd_screen_t which);
+
 // set a character on one of the LCD's 7 segment displays
 void lcd_set_char(lcd_digit_t where, char c);
 // write a string to a screen
 // any longer than 5 chars is truncated
 // any shorter is set to space
 void lcd_put_str(lcd_screen_t which, char* s);
+// put a reading on a screen
+// automatically sets the units and powers accordingly
+void lcd_put_reading(lcd_screen_t which, reading_t reading);
 
 #endif

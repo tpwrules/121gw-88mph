@@ -23,6 +23,8 @@
 #include "lcd.h"
 #include "lcd_tables.h"
 
+#include "acquisition/reading.h"
+
 uint32_t lcd_segment_buffer[8];
 
 // transfer the LCD buffer to LCD RAM and trigger an update
@@ -35,6 +37,15 @@ void lcd_update() {
     }
     // and set the bit to trigger a new update
     LCD->SR |= LCD_SR_UDR;
+}
+
+// turn off all the units on the selected screen
+void lcd_clear_units_powers(lcd_screen_t which) {
+    for (int i=0; i<11; i++) {
+        uint8_t seg = lcd_unit_icons[which][i];
+        if (seg != 0xFF)
+            LCD_SEGOFF(seg);
+    }
 }
 
 // set a character on one of the LCD's 7 segment displays
@@ -81,5 +92,41 @@ void lcd_put_str(lcd_screen_t which, char* s) {
         lcd_set_char(where++, c);
         if (c)
             s++;
+    }
+}
+
+// put a reading on a screen
+// automatically sets the units and powers accordingly
+void lcd_put_reading(lcd_screen_t which, reading_t reading) {
+    // to do: somehow cache the current unit and exponent so that
+    // we don't have to turn off and on the segments each time
+
+    // but for now, we gotta
+    lcd_clear_units_powers(which);
+
+    // round reading to display size
+    int val = (reading.millicounts + 500)/1000;
+
+    // set negative sign
+    if (which == LCD_SCREEN_MAIN) {
+        LCD_SEGSET(SEG_MS_NEGATIVE, val < 0);
+    } else {
+        LCD_SEGSET(SEG_SS_NEGATIVE, val < 0);
+    }
+
+    val = (val < 0) ? -val : val;
+
+    // put each digit in its place
+    lcd_digit_t place = 
+        which == LCD_SCREEN_SUB ? LCD_DIGIT_SS_1 : LCD_DIGIT_MS_1;
+    for (int di=0; di<5; di++) {
+        lcd_set_char(place--, (val % 10)+'0');
+        val /= 10;
+    }
+
+    // if there's a unit icon, turn it on
+    uint8_t unit_seg = lcd_unit_icons[which][reading.unit];
+    if (unit_seg != 0xFF) {
+        LCD_SEGON(unit_seg);
     }
 }

@@ -23,5 +23,6 @@
 
 extern const uint8_t lcd_7seg_font[36];
 extern const uint8_t lcd_7seg_segments[10][7];
+extern const uint8_t lcd_unit_icons[2][11];
 
 #endif

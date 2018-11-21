@@ -21,6 +21,8 @@
 #include "lcd_tables.h"
 #include "lcd_segments.h"
 
+#include "acquisition/reading.h"
+
 // table to map letters and numbers to segments
 // each byte is in xGFEDCBA order
 const uint8_t lcd_7seg_font[36] = {
@@ -57,4 +59,24 @@ const uint8_t lcd_7seg_segments[10][7] = {
         SEG_MS_10_E, SEG_MS_10_F, SEG_MS_10_G},
     {SEG_MS_1_A, SEG_MS_1_B, SEG_MS_1_C, SEG_MS_1_D,
         SEG_MS_1_E, SEG_MS_1_F, SEG_MS_1_G}
+};
+
+// table to map reading units to lcd segments
+// 0 = subscreen, 1 = main screen
+// order follows that defined in reading.h
+const uint8_t lcd_unit_icons[2][11] = {
+    // on subscreen
+    {
+        0xFF, SEG_SS_AMPS, 0xFF, 0xFF,
+        SEG_SS_HERTZ, SEG_SS_nS, SEG_SS_OHMS,
+        SEG_SS_VOLTS, 0xFF, 0xFF,
+        SEG_SS_dB
+    },
+    // and main screen
+    {
+        0xFF, SEG_MS_AMPS, SEG_MS_DUTY_PERCENT, SEG_MS_FARADS,
+        SEG_MS_HERTZ, SEG_MS_mSEC, SEG_MS_OHMS,
+        SEG_MS_VOLTS, SEG_MS_DEG_C, SEG_MS_DEG_F,
+        0xFF
+    }
 };

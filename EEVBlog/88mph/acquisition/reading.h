@@ -16,11 +16,15 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
+#ifndef ACQUISITION_READING_H
+#define ACQUISITION_READING_H
+
 #include <stdint.h>
 
 // this file introduces the concept of a Reading
 
 // a Reading is associated with a unit
+// note that the table lcd_unit_icons is in this order
 typedef enum {
     RDG_UNIT_NONE=0,
     RDG_UNIT_AMPS,
@@ -47,3 +51,5 @@ typedef struct {
     // shows 00001 on the display
     int8_t exponent;
 } reading_t;
+
+#endif

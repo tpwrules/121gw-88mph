@@ -24,6 +24,9 @@
 #include "hardware/lcd.h"
 #include "hardware/hy3131.h"
 #include "hardware/gpio.h"
+
+#include "acquisition/reading.h"
+
 #include "88mph.h"
 
 void main_88mph(void) {
@@ -53,17 +56,14 @@ void main_88mph(void) {
             ad1 |= 0xFF000000;
         }
 
-        // apply approximate calibration figure
-        ad1 /= 60;
+        // coerce into reading for new function
+        reading_t reading;
+        reading.millicounts = (ad1 * 100)/6;
+        reading.unit = RDG_UNIT_VOLTS;
+        reading.exponent = 0;
 
-        // too lazy to deal with negative/>5 digit numbers
-        if (ad1 < 0 || ad1 > 99999)
-            ad1 = 0;
-
-        // use plain ascii to write to screen
-        char num_str[30];
-        sprintf(num_str, "%05ld", ad1);
-        lcd_put_str(LCD_SCREEN_MAIN, num_str);
+        // now put it where it belongs
+        lcd_put_reading(LCD_SCREEN_MAIN, reading);
 
         // flush screen changes and wait a bit before
         // reading sample register again
