@@ -128,14 +128,14 @@
 #define SEG_MS_mSEC               _LCD_SEGDEF(6, 0)
 #define SEG_MS_OHMS               _LCD_SEGDEF(2, 8)
 #define SEG_MS_VOLTS              _LCD_SEGDEF(4, 10)
-
-// main screen units
 #define SEG_MS_DEG_C              _LCD_SEGDEF(4, 11)
 #define SEG_MS_DEG_F              _LCD_SEGDEF(6, 11)
-#define SEG_MS_KILO               _LCD_SEGDEF(0, 8)
+
+// main screen units
 #define SEG_MS_MEGA               _LCD_SEGDEF(0, 11)
-#define SEG_MS_MICRO              _LCD_SEGDEF(0, 9)
+#define SEG_MS_KILO               _LCD_SEGDEF(0, 8)
 #define SEG_MS_MILLI              _LCD_SEGDEF(2, 10)
+#define SEG_MS_MICRO              _LCD_SEGDEF(0, 9)
 #define SEG_MS_NANO               _LCD_SEGDEF(2, 9)
 
 
