@@ -47,8 +47,10 @@ typedef struct {
     // the base unit of the reading
     rdg_unit_t unit;
     // the exponent of the reading
-    // exponent 0 and millicounts 1000
-    // shows 00001 on the display
+    // exponent 0 and millicounts 10000000
+    // shows 1.0000 on the display
+    // exponent of 1 would show 10.000
+    // and -1 would show 100.00 with the milli icon turned on
     int8_t exponent;
 } reading_t;
 

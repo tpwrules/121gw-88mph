@@ -46,6 +46,16 @@ void lcd_clear_units_powers(lcd_screen_t which) {
         if (seg != 0xFF)
             LCD_SEGOFF(seg);
     }
+
+    for (int i=0; i<6; i++) {
+        uint8_t seg = lcd_power_icons[which][i];
+        if (seg != 0xFF)
+            LCD_SEGOFF(seg);
+    }
+
+    for (int i=0; i<3; i++) {
+        LCD_SEGOFF(lcd_decimal_points[which][i]);
+    }
 }
 
 // set a character on one of the LCD's 7 segment displays
@@ -125,8 +135,26 @@ void lcd_put_reading(lcd_screen_t which, reading_t reading) {
     }
 
     // if there's a unit icon, turn it on
-    uint8_t unit_seg = lcd_unit_icons[which][reading.unit];
-    if (unit_seg != 0xFF) {
-        LCD_SEGON(unit_seg);
+    uint8_t seg = lcd_unit_icons[which][reading.unit];
+    if (seg != 0xFF) {
+        LCD_SEGON(seg);
+    }
+
+    // figure out the power icons and decimal point location
+    reading.exponent += 9;
+    // make sure we don't over-index an array
+    if (reading.exponent < 0 || reading.exponent >= 18) {
+        // if we're about to, just bail on the operation completely
+        return;
+    }
+    int decimal_loc = (reading.exponent%3);
+    int power = (reading.exponent)/3;
+    // turn on the decimal point
+    // it always exists
+    LCD_SEGON(lcd_decimal_points[which][decimal_loc]);
+    // and then the power icon, if it exists
+    seg = lcd_power_icons[which][power];
+    if (seg != 0xFF) {
+        LCD_SEGON(seg);
     }
 }

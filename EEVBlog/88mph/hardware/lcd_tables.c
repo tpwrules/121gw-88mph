@@ -80,3 +80,23 @@ const uint8_t lcd_unit_icons[2][11] = {
         0xFF
     }
 };
+
+// table to map exponents to power icons
+// starts at nano, ends at mega
+// 0 = subscreen, 1 = main screen
+const uint8_t lcd_power_icons[2][6] = {
+    // subscreen
+    {0xFF, 0xFF, SEG_SS_MILLI, 0xFF, SEG_SS_KILO, 0xFF},
+    // main screen
+    {SEG_MS_NANO, SEG_MS_MICRO, SEG_MS_MILLI,
+        0xFF, SEG_MS_KILO, SEG_MS_MEGA}
+};
+
+// table to map exponents to decimal points
+// 0 = subscreen, 1 = main screen
+const uint8_t lcd_decimal_points[2][3] = {
+    // subscreen
+    {SEG_SS_POINT_d0000, SEG_SS_POINT_d000, SEG_SS_POINT_d00},
+    // and main screen
+    {SEG_MS_POINT_d0000, SEG_MS_POINT_d000, SEG_MS_POINT_d00}
+};
