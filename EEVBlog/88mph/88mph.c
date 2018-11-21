@@ -17,7 +17,6 @@
  *****************************************************************************/
 
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdio.h>
 
 #include "stm32l1xx_hal.h"
@@ -33,8 +32,8 @@ void main_88mph(void) {
     // turn on 4V analog source
     GPIO_PINSET(HW_PWR_CTL2);
 
-    lcd_put_str(true, "hello");
-    lcd_put_str(false, "world");
+    lcd_put_str(LCD_SCREEN_SUB, "hello");
+    lcd_put_str(LCD_SCREEN_MAIN, "world");
     lcd_update();
 
     static const uint8_t regs[20] =
@@ -64,7 +63,7 @@ void main_88mph(void) {
         // use plain ascii to write to screen
         char num_str[30];
         sprintf(num_str, "%05ld", ad1);
-        lcd_put_str(false, num_str);
+        lcd_put_str(LCD_SCREEN_MAIN, num_str);
 
         // flush screen changes and wait a bit before
         // reading sample register again

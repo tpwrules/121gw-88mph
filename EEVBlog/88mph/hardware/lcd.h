@@ -24,11 +24,32 @@
 */
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "lcd_segments.h"
 
 extern uint32_t lcd_segment_buffer[8];
+
+// define the digits on the screen for lcd_set_char
+// this enum is in the order defined in lcd_7seg_segments
+typedef enum {
+    LCD_DIGIT_SS_10000=0,
+    LCD_DIGIT_SS_1000=1,
+    LCD_DIGIT_SS_100=2,
+    LCD_DIGIT_SS_10=3,
+    LCD_DIGIT_SS_1=4,
+
+    LCD_DIGIT_MS_10000=5,
+    LCD_DIGIT_MS_1000=6,
+    LCD_DIGIT_MS_100=7,
+    LCD_DIGIT_MS_10=8,
+    LCD_DIGIT_MS_1=9
+} lcd_digit_t;
+
+// define the main and sub screens for the various put functions
+typedef enum {
+    LCD_SCREEN_SUB=0,
+    LCD_SCREEN_MAIN=1
+} lcd_screen_t;
 
 // update the LCD from the segment buffer
 void lcd_update();
@@ -41,12 +62,11 @@ void lcd_update();
 #define LCD_SEGSET(seg, val)\
     (val ? LCD_SEGON(seg) : LCD_SEGOFF(seg))
 
-// set a character on the LCD
-// 0-4: sub screen, left to right
-// 5-9: main screen, left to right
-void lcd_set_char(uint8_t where, char c);
+// set a character on one of the LCD's 7 segment displays
+void lcd_set_char(lcd_digit_t where, char c);
 // write a string to a screen
-// 0: main, 1: sub
-void lcd_put_str(bool on_subscreen, char* s);
+// any longer than 5 chars is truncated
+// any shorter is set to space
+void lcd_put_str(lcd_screen_t which, char* s);
 
 #endif

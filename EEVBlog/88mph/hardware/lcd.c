@@ -17,7 +17,6 @@
  *****************************************************************************/
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "stm32l1xx.h"
 
@@ -39,9 +38,7 @@ void lcd_update() {
 }
 
 // set a character on one of the LCD's 7 segment displays
-// 0-4: sub screen, left to right
-// 5-9: main screen, left to right
-void lcd_set_char(uint8_t where, char c) {
+void lcd_set_char(lcd_digit_t where, char c) {
     // first step: look up the char and get its segments
     uint8_t segs;
     if (c >= 'A' && c <= 'Z') {
@@ -66,18 +63,18 @@ void lcd_set_char(uint8_t where, char c) {
 
     // now set them accordingly
     for (int i=0; i<7; i++) {
-        LCD_SEGSET(lcd_7seg_segments[where][i],
+        LCD_SEGSET(lcd_7seg_segments[(uint8_t)where][i],
             segs & 1);
         segs >>= 1;
     }
 }
 
 // write a string to a screen
-// 0: main, 1: sub
 // any longer than 5 chars is truncated
 // any shorter is set to space
-void lcd_put_str(bool on_subscreen, char* s) {
-    uint8_t where = on_subscreen ? 0 : 5;
+void lcd_put_str(lcd_screen_t which, char* s) {
+    lcd_digit_t where = 
+        which == LCD_SCREEN_SUB ? LCD_DIGIT_SS_10000 : LCD_DIGIT_MS_10000;
     
     for (int i=0; i<5; i++) {
         char c = *s;
