@@ -19,21 +19,23 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "stm32l1xx_hal.h"
-#include "stm32l1xx_hal_lcd.h"
+#include "stm32l1xx.h"
 
 #include "lcd.h"
 #include "lcd_tables.h"
 
-extern LCD_HandleTypeDef hlcd;
 uint32_t lcd_segment_buffer[8];
 
 // transfer the LCD buffer to LCD RAM and trigger an update
 void lcd_update() {
+    // wait for any pending update to be completed
+    while (LCD->SR & LCD_SR_UDR);
+    // fill the LCD RAM with our buffer
     for (int i=0; i<8; i++) {
-        HAL_LCD_Write(&hlcd, i, 0, lcd_segment_buffer[i]);
+        LCD->RAM[i] = lcd_segment_buffer[i];
     }
-    HAL_LCD_UpdateDisplayRequest(&hlcd);
+    // and set the bit to trigger a new update
+    LCD->SR |= LCD_SR_UDR;
 }
 
 // set a character on one of the LCD's 7 segment displays
