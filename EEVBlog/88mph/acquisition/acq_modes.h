@@ -34,7 +34,11 @@ typedef enum {
 typedef enum {
     ACQ_MODE_MISC_SUBMODE_OFF=0,
 
-    ACQ_MODE_VOLTS_DC_SUBMODE_5d000=0,
+    ACQ_MODE_VOLTS_DC_SUBMODE_5d0000=0,
+    ACQ_MODE_VOLTS_DC_SUBMODE_50d000,
+    ACQ_MODE_VOLTS_DC_SUBMODE_500d00,
+    ACQ_MODE_VOLTS_DC_SUBMODE_1000d0
+
 } acq_submode_t;
 
 // we also need to define the mode function

@@ -38,11 +38,17 @@ void main_88mph(void) {
     lcd_put_str(LCD_SCREEN_MAIN, "world");
     lcd_update();
 
-    acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d000);
+    acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d0000);
+    int submode = 0;
 
     while (1) {
         // eventually will be called by an interrupt
         acq_process_hy_int();
+        int new_submode = (HAL_GetTick()/1000)%4;
+        if (submode != new_submode) {
+            submode = new_submode;
+            acq_set_submode(submode);
+        }
 
         reading_t reading;
 

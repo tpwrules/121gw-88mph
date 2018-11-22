@@ -27,19 +27,30 @@
 // registers for volts dc
 // first dimension is submode, second is register
 
-static const uint8_t volts_dc_regs[1][20] = {
-    // 5.000V
+static const uint8_t volts_dc_regs[4][20] = {
+    // DCV 5.0000V
     {   0,   0,0x13,0x8A,   5,0x40,   0,0x4D,0x31,   1,
-         0x22,   0,   0,0x90,0x28,0xA0,0x80,0xC7,   0,0x20}
+     0x22,   0,   0,0x90,0x28,0xA0,0x80,0xC7,   0,0x20},
+    // DCV 50.000V
+    {   0,   0,0x13,0x8A,   5,0x40,   0,0x4D,0x31,   1,
+     0x22,   0,   0,   9,0x28,0xA0,0x80,0xC7,   8,0x2C},
+    // DCV 500.00V
+    {   0,   0,0x13,0x8A,   5,0x40,   0,0x4D,0x31,   1,
+     0x22,   0,0x90,   0,0x28,0xA0,0x80,0xC7,   8,0x2C},
+    // DCV 1000.0V (600.0V)
+    {   0,   0,0x13,0x8A,   5,0x40,   0,0x4D,0x31,   1,
+     0x22,   0,   9,   0,0x28,0xA0,0x80,0xC7,   8,0x2C}
 };
 
 void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
+    static acq_submode_t submode = 0;
+
     switch (event) {
         case ACQ_EVENT_START:
         case ACQ_EVENT_SET_SUBMODE: {
             // starting and setting submodes is the same:
             // program new register set into the HY3131
-            int submode = (int)value;
+            submode = (int)value;
             hy_write_regs(0x20, 20,
                 &volts_dc_regs[submode][0]);
             break;
@@ -53,8 +64,8 @@ void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
             // approximately calibrate by dividing by 60
             reading.millicounts = (ad1*100)/6;
             reading.unit = RDG_UNIT_VOLTS;
-            // in the future this will depend on the submode
-            reading.exponent = 0;
+            // conveniently, the submode is the exponent
+            reading.exponent = submode;
             // tell the new reading to the rest of the acquisition engine
             acq_set_reading(0, reading);
             break;
