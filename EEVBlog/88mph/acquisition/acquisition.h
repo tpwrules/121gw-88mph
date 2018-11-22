@@ -20,10 +20,33 @@
 #define ACQUISITION_ACQUISITION_H
 
 #include <stdint.h>
+#include <stdbool.h>
+
+#include "reading.h"
+#include "acq_modes.h"
 
 // turn on the acquisition engine
 void acq_init();
 // turn off the acquisition engine
 void acq_deinit();
+
+// called when the HY3131 triggers an interrupt
+// it's okay if there's actually nothing to do
+void acq_process_hy_int();
+
+
+// set acquisition state
+void acq_set_mode(acq_mode_t mode, acq_submode_t submode);
+void acq_set_submode(acq_submode_t submode);
+
+// handle the acquired values
+// there are 4 available readings
+// which one is which depends on the mode
+void acq_set_reading(int which, reading_t reading);
+// returns false if the reading isn't new
+// if it is new, returns true and puts it in reading
+bool acq_get_reading(int which, reading_t* reading);
+
+void acq_mode_func_misc(acq_event_t event, int64_t value);
 
 #endif

@@ -16,41 +16,45 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
+#ifndef ACQUISITION_ACQ_MODES_H
+#define ACQUISITION_ACQ_MODES_H
+
 #include <stdint.h>
-#include <stdio.h>
 
-#include "stm32l1xx_hal.h"
+// this file defines the acquisition modes and submodes
+// the corresponding .c has a table with function pointers to the mode handlers
+// keep the ordering of these options the same!
 
-#include "hardware/lcd.h"
-#include "hardware/hy3131.h"
-#include "hardware/gpio.h"
+typedef enum {
+    ACQ_MODE_MISC=0,
+    ACQ_MODE_VOLTS_DC
+} acq_mode_t;
 
-#include "acquisition/acquisition.h"
-#include "acquisition/acq_modes.h"
-#include "acquisition/reading.h"
+// each mode starts its submodes at 0!!!
+typedef enum {
+    ACQ_MODE_MISC_SUBMODE_OFF=0,
 
-#include "88mph.h"
+    ACQ_MODE_VOLTS_DC_SUBMODE_5d000=0,
+} acq_submode_t;
 
-void main_88mph(void) {
-    acq_init();
+// we also need to define the mode function
+typedef enum {
+    // these are called from main thread
+    // begin acquiring, value is initial submode
+    ACQ_EVENT_START=0,
+    // stop acquiring, value is meaningless
+    ACQ_EVENT_STOP,
+    // switch submodes, value is new submode
+    ACQ_EVENT_SET_SUBMODE,
 
-    lcd_put_str(LCD_SCREEN_SUB, "hello");
-    lcd_put_str(LCD_SCREEN_MAIN, "world");
-    lcd_update();
+    // these are called from interrupt!
+    // watch out
+    // new measurement available, value is new measurement
+    ACQ_EVENT_NEW_AD1
+} acq_event_t;
 
-    acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d000);
+typedef void (*acq_mode_func)(acq_event_t event, int64_t value);
 
-    while (1) {
-        // eventually will be called by an interrupt
-        acq_process_hy_int();
+extern const acq_mode_func acq_mode_funcs[2];
 
-        reading_t reading;
-
-        if (acq_get_reading(0, &reading)) {
-            // now put it where it belongs
-            lcd_put_reading(LCD_SCREEN_MAIN, reading);
-
-            lcd_update();
-        }
-    }
-}
+#endif

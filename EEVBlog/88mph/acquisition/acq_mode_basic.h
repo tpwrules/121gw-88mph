@@ -16,41 +16,15 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
+#ifndef ACQUISITION_ACQ_MODE_BASIC_H
+#define ACQUISITION_ACQ_MODE_BASIC
+
 #include <stdint.h>
-#include <stdio.h>
+#include "acq_modes.h"
 
-#include "stm32l1xx_hal.h"
+// this file defines the acquisition mode funcs for the boring modes
+// volts, etc
 
-#include "hardware/lcd.h"
-#include "hardware/hy3131.h"
-#include "hardware/gpio.h"
+void acq_mode_func_volts_dc(acq_event_t event, int64_t value);
 
-#include "acquisition/acquisition.h"
-#include "acquisition/acq_modes.h"
-#include "acquisition/reading.h"
-
-#include "88mph.h"
-
-void main_88mph(void) {
-    acq_init();
-
-    lcd_put_str(LCD_SCREEN_SUB, "hello");
-    lcd_put_str(LCD_SCREEN_MAIN, "world");
-    lcd_update();
-
-    acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d000);
-
-    while (1) {
-        // eventually will be called by an interrupt
-        acq_process_hy_int();
-
-        reading_t reading;
-
-        if (acq_get_reading(0, &reading)) {
-            // now put it where it belongs
-            lcd_put_reading(LCD_SCREEN_MAIN, reading);
-
-            lcd_update();
-        }
-    }
-}
+#endif

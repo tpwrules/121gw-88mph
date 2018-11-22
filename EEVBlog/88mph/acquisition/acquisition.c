@@ -26,6 +26,9 @@
 #include "hardware/gpio.h"
 
 #include "acquisition.h"
+#include "acq_modes.h"
+
+static acq_mode_func curr_acq_mode_func = 0;
 
 // turn on the acquisition engine
 void acq_init() {
@@ -33,12 +36,82 @@ void acq_init() {
     GPIO_PINSET(HW_PWR_CTL);
     // turn on the 4V analog supply
     GPIO_PINSET(HW_PWR_CTL2);
+    // switch to the 'off' mode
+    acq_set_mode(ACQ_MODE_MISC, ACQ_MODE_MISC_SUBMODE_OFF);
 }
 
 // turn off the acquisition engine
 void acq_deinit() {
+    // stop the current acquisition by switching to 'off'
+    acq_set_mode(ACQ_MODE_MISC, ACQ_MODE_MISC_SUBMODE_OFF);
+    // and cancel out the acq function
+    curr_acq_mode_func = 0;
     // turn off analog supply
     GPIO_PINRST(HW_PWR_CTL2);
     // and then digital supply
     GPIO_PINRST(HW_PWR_CTL);
+}
+
+// called when the HY3131 triggers an interrupt
+// it's okay if there's actually nothing to do
+void acq_process_hy_int() {
+    uint8_t regbuf[5];
+
+    // read which interrupts are pending
+    // this also clears the pending interrupts
+    uint8_t which_ints;
+    hy_read_regs(HY_REG_INTF, 1, &which_ints);
+    if (which_ints & HY_REG_INT_AD1) {
+        // read the 24 bit AD1 register
+        hy_read_regs(HY_REG_AD1_DATA, 3, regbuf);
+        int32_t val = regbuf[2] << 16 | regbuf[1] << 8 | regbuf[0];
+        // sign extend 24 bits to 32
+        if (val & 0x800000) {
+            val |= 0xFF000000;
+        }
+        // tell the current acquisiton mode about it
+        curr_acq_mode_func(ACQ_EVENT_NEW_AD1, val);
+    }
+}
+
+void acq_set_mode(acq_mode_t mode, acq_submode_t submode) {
+    // turn off the current mode, if there is one
+    if (curr_acq_mode_func) {
+        curr_acq_mode_func(ACQ_EVENT_STOP, 0);
+    }
+    // figure out which mode func goes with this mode
+    curr_acq_mode_func = acq_mode_funcs[mode];
+    // and start it up
+    curr_acq_mode_func(ACQ_EVENT_START, (int64_t)submode);
+}
+
+void acq_set_submode(acq_submode_t submode) {
+    curr_acq_mode_func(ACQ_EVENT_SET_SUBMODE, (int64_t)submode);
+}
+
+static reading_t curr_readings[4];
+static bool is_reading_new[4] = {false, false, false, false};
+
+void acq_set_reading(int which, reading_t reading) {
+    curr_readings[which] = reading;
+    is_reading_new[which] = true;
+}
+
+bool acq_get_reading(int which, reading_t* reading) {
+    // it might get set from the hy interrupt
+    __disable_irq();
+    bool its_new = is_reading_new[which];
+    if (its_new) {
+        is_reading_new[which] = false;
+        *reading = curr_readings[which];
+    }
+    __enable_irq();
+    return its_new;
+}
+
+// misc mode handler
+// for now it doesn't do anything
+// idk if it even should
+void acq_mode_func_misc(acq_event_t event, int64_t value) {
+    return;
 }
