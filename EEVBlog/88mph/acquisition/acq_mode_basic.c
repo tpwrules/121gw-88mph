@@ -48,11 +48,17 @@ void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
     switch (event) {
         case ACQ_EVENT_START:
         case ACQ_EVENT_SET_SUBMODE: {
-            // starting and setting submodes is the same:
+            // starting and setting submodes is the same
+            // disable chip interrupts so we don't get re-entered
+            hy_enable_irq(false);
             // program new register set into the HY3131
             submode = (int)value;
             hy_write_regs(0x20, 20,
                 &volts_dc_regs[submode][0]);
+            // enable the AD1 interrupt so we can display the measurement
+            acq_set_int_mask(HY_REG_INT_AD1);
+            // and enable chip interrupts again
+            hy_enable_irq(true);
             break;
         }
 
@@ -71,8 +77,11 @@ void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
             break;
         }
 
-        // prolly should at least be turning off the interrupts at stop
-        case ACQ_EVENT_STOP:
+        case ACQ_EVENT_STOP: {
+            hy_enable_irq(false);
+            break;
+        }
+        
         default: {
             break;
         }

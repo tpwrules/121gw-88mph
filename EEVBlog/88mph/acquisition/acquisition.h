@@ -34,6 +34,9 @@ void acq_deinit();
 // it's okay if there's actually nothing to do
 void acq_process_hy_int();
 
+// set the HY int enable register
+void acq_set_int_mask(uint8_t mask);
+
 
 // set acquisition state
 void acq_set_mode(acq_mode_t mode, acq_submode_t submode);

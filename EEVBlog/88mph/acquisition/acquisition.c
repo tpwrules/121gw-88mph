@@ -29,6 +29,7 @@
 #include "acq_modes.h"
 
 static acq_mode_func curr_acq_mode_func = 0;
+static volatile uint8_t curr_int_mask = 0;
 
 // turn on the acquisition engine
 void acq_init() {
@@ -36,8 +37,15 @@ void acq_init() {
     GPIO_PINSET(HW_PWR_CTL);
     // turn on the 4V analog supply
     GPIO_PINSET(HW_PWR_CTL2);
-    // switch to the 'off' mode
-    acq_set_mode(ACQ_MODE_MISC, ACQ_MODE_MISC_SUBMODE_OFF);
+    // give the HY3131 a bit of time to power up
+    // who knows if this is necessary, but it feels good
+    HAL_Delay(10);
+    // initialize it
+    hy_init();
+    // switch to the 'off' mode manually
+    // cause there should be no previous mode func to call
+    curr_acq_mode_func = acq_mode_funcs[ACQ_MODE_MISC];
+    curr_acq_mode_func(ACQ_EVENT_START, (int64_t)ACQ_MODE_MISC_SUBMODE_OFF);
 }
 
 // turn off the acquisition engine
@@ -46,6 +54,8 @@ void acq_deinit() {
     acq_set_mode(ACQ_MODE_MISC, ACQ_MODE_MISC_SUBMODE_OFF);
     // and cancel out the acq function
     curr_acq_mode_func = 0;
+    // stop the HY3131
+    hy_deinit();
     // turn off analog supply
     GPIO_PINRST(HW_PWR_CTL2);
     // and then digital supply
@@ -61,6 +71,8 @@ void acq_process_hy_int() {
     // this also clears the pending interrupts
     uint8_t which_ints;
     hy_read_regs(HY_REG_INTF, 1, &which_ints);
+    // only handle pending interrupts which are enabled
+    which_ints &= curr_int_mask;
     if (which_ints & HY_REG_INT_AD1) {
         // read the 24 bit AD1 register
         hy_read_regs(HY_REG_AD1_DATA, 3, regbuf);
@@ -69,16 +81,28 @@ void acq_process_hy_int() {
         if (val & 0x800000) {
             val |= 0xFF000000;
         }
-        // tell the current acquisiton mode about it
+        // tell the current acquisition mode about it
         curr_acq_mode_func(ACQ_EVENT_NEW_AD1, val);
     }
 }
 
+void acq_set_int_mask(uint8_t mask) {
+    // disable interrupts around this so curr_int_mask isn't wrong
+    bool prev = hy_disable_irq();
+    curr_int_mask = mask;
+    // the caller probably is changing the int mask because they've reconfigured
+    // the chip, so clear pending interrupts from the chip first
+    uint8_t whatever;
+    hy_read_regs(HY_REG_INTF, 1, &whatever);
+    // now enable the interrupts the user wanted
+    hy_write_regs(HY_REG_INTE, 1, &mask);
+    // and start listening for them
+    hy_enable_irq(prev);
+}
+
 void acq_set_mode(acq_mode_t mode, acq_submode_t submode) {
-    // turn off the current mode, if there is one
-    if (curr_acq_mode_func) {
-        curr_acq_mode_func(ACQ_EVENT_STOP, 0);
-    }
+    // turn off the current mode
+    curr_acq_mode_func(ACQ_EVENT_STOP, 0);
     // figure out which mode func goes with this mode
     curr_acq_mode_func = acq_mode_funcs[mode];
     // and start it up
@@ -110,8 +134,8 @@ bool acq_get_reading(int which, reading_t* reading) {
 }
 
 // misc mode handler
-// for now it doesn't do anything
-// idk if it even should
 void acq_mode_func_misc(acq_event_t event, int64_t value) {
-    return;
+    // anything in the misc mode should just be turning off
+    hy_disable_irq();
+    acq_set_int_mask(0);
 }

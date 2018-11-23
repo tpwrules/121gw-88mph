@@ -32,6 +32,7 @@
 #include "88mph.h"
 
 void main_88mph(void) {
+    __enable_irq();
     acq_init();
 
     lcd_put_str(LCD_SCREEN_SUB, "hello");
@@ -42,8 +43,6 @@ void main_88mph(void) {
     int submode = 0;
 
     while (1) {
-        // eventually will be called by an interrupt
-        acq_process_hy_int();
         int new_submode = (HAL_GetTick()/1000)%4;
         if (submode != new_submode) {
             submode = new_submode;

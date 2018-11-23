@@ -20,6 +20,7 @@
 #define HARDWARE_HY3131_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // this file manages interacting with the HY3131 measurement chip
 
@@ -58,6 +59,21 @@
 #define HY_REG_INT_AD1 (0x04)
 #define HY_REG_INT_AD2 (0x02)
 #define HY_REG_INT_CT (0x01)
+
+void hy_init();
+void hy_deinit();
+
+// the EXTI3 interrupt is triggered when the chip asserts its IRQ
+void EXTI3_IRQHandler(void);
+
+// turn on and off processing the IRQ from the chip
+
+// enable IRQs only if enable is true
+// if enable is false, the IRQ state is not changed
+void hy_enable_irq(bool enable);
+// disable IRQs. previous IRQ state is returned
+bool hy_disable_irq();
+
 
 // read a series of registers from the chip
 void hy_read_regs(uint8_t start, uint8_t count, uint8_t* data);

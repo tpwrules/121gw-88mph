@@ -17,11 +17,81 @@
  *****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "hy3131.h"
 
 #include "main.h" // for cube pin defs
 #include "gpio.h"
+
+#include "acquisition/acquisition.h"
+
+void hy_init() {
+    // set up the interrupt handler
+    // the chip DO line is connected to PF3, so it's on the EXTI3 line
+
+    // disable the EXTI3 interrupt in NVIC so interrupts start off disabled
+    NVIC_DisableIRQ(EXTI3_IRQn);
+
+    // configure EXTI3 to monitor the F pin
+    MODIFY_REG(SYSCFG->EXTICR[0], // this EXTICR starts at 0 unlike the docs >_>
+        SYSCFG_EXTICR1_EXTI3, 
+        SYSCFG_EXTICR1_EXTI3_PF);
+
+    // enable the rising edge interrupt
+    SET_BIT(EXTI->RTSR, EXTI_RTSR_TR3);
+
+    // and unmask the interrupt so the NVIC sees it
+    SET_BIT(EXTI->IMR, EXTI_IMR_MR3);
+}
+
+void hy_deinit() {
+    hy_enable_irq(false);
+}
+
+
+static volatile bool irq_enabled = false;
+
+// chip interrupt is connected to EXTI3
+void EXTI3_IRQHandler(void) {
+    // tell EXTI we got this interrupt
+    EXTI->PR = EXTI_PR_PR3;
+
+    // even if interrupt didn't happen, it's okay to call the acq handler
+    acq_process_hy_int();
+}
+
+void hy_enable_irq(bool enable) {
+    if (!enable) return;
+
+    __disable_irq();
+    irq_enabled = true;
+    // clear any pending interrupt in the EXTI
+    EXTI->PR = EXTI_PR_PR3;
+    // and then the NVIC
+    NVIC_ClearPendingIRQ(EXTI3_IRQn);
+    // tell the NVIC we want to know again
+    NVIC_EnableIRQ(EXTI3_IRQn);
+    // check to see if the chip currently is trying to interrupt us
+    if (GPIO_PINGET(HY_DO)) {
+        // if it is, the input is edge-triggered and we just cleared it,
+        // so we have to trigger the interrupt in software since the
+        // input won't see the edge again
+        EXTI->SWIER = EXTI_SWIER_SWIER3;
+    }
+    __enable_irq();
+}
+
+bool hy_disable_irq() {
+    __disable_irq();
+    bool previous = irq_enabled;
+    irq_enabled = false;
+    // ask the NVIC to stop bothering us
+    NVIC_DisableIRQ(EXTI3_IRQn);
+    __enable_irq();
+    return previous;
+}
+
 
 // just wait some time to let setup and hold delays happen
 static void spinloop(uint32_t times) {
@@ -58,6 +128,11 @@ static uint8_t recv_byte() {
 
 // read a series of registers from the chip
 void hy_read_regs(uint8_t start, uint8_t count, uint8_t* data) {
+    // we have to turn off interrupts while doing this
+    // because the chip will be wiggling DO and making spurious interrupts
+    // all over the place
+    bool prev = hy_disable_irq();
+
     // assert chip select
     GPIO_PINRST(HY_CS);
 
@@ -74,10 +149,19 @@ void hy_read_regs(uint8_t start, uint8_t count, uint8_t* data) {
 
     // deassert chip select to finish off 
     GPIO_PINSET(HY_CS);
+    // wait for DO to stabilize once CS is deasserted
+    spinloop(1);
+    // and configure interrupts how they were
+    hy_enable_irq(prev);
 }
 
 // write a series of registers to the chip
 void hy_write_regs(uint8_t start, uint8_t count, const uint8_t* data) {
+    // we have to turn off interrupts while doing this
+    // because the chip will be wiggling DO and making spurious interrupts
+    // all over the place
+    bool prev = hy_disable_irq();
+
     // assert chip select
     GPIO_PINRST(HY_CS);
 
@@ -92,4 +176,8 @@ void hy_write_regs(uint8_t start, uint8_t count, const uint8_t* data) {
     // deassert chip select and data out to finish off 
     GPIO_PINSET(HY_CS);
     GPIO_PINRST(HY_DI);
+    // wait for DO to stabilize once CS is deasserted
+    spinloop(1);
+    // and configure interrupts how they were
+    hy_enable_irq(prev);
 }
