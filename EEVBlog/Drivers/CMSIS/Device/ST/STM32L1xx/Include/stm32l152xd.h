@@ -6602,8 +6602,9 @@ typedef struct
 #define SYSCFG_EXTICR1_EXTI3_PC         (0x00002000U)                          /*!< PC[3] pin */
 #define SYSCFG_EXTICR1_EXTI3_PD         (0x00003000U)                          /*!< PD[3] pin */
 #define SYSCFG_EXTICR1_EXTI3_PE         (0x00004000U)                          /*!< PE[3] pin */
-#define SYSCFG_EXTICR1_EXTI3_PF         (0x00003000U)                          /*!< PF[3] pin */
-#define SYSCFG_EXTICR1_EXTI3_PG         (0x00004000U)                          /*!< PG[3] pin */
+#define SYSCFG_EXTICR1_EXTI3_PH         (0x00005000U)                          /*!< PH[3] pin */
+#define SYSCFG_EXTICR1_EXTI3_PF         (0x00006000U)                          /*!< PF[3] pin */
+#define SYSCFG_EXTICR1_EXTI3_PG         (0x00007000U)                          /*!< PG[3] pin */
 
 /*****************  Bit definition for SYSCFG_EXTICR2 register  *****************/
 #define SYSCFG_EXTICR2_EXTI4_Pos        (0U)                                   
