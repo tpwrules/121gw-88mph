@@ -233,6 +233,19 @@ typedef enum
 
 #define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL))) 
 
+// added by Thomas Watson
+
+#include <stdbool.h>
+
+#define BITBAND_SRAM_REF (0x20000000)
+#define BITBAND_SRAM_BASE (0x22000000)
+#define BITBAND_SRAM(a,b) ((volatile bool*) \
+    ((BITBAND_SRAM_BASE + (((uint32_t)(a))-BITBAND_SRAM_REF)*32 + ((b)*4))))
+
+#define BITBAND_PERIPH_REF (0x40000000)
+#define BITBAND_PERIPH_BASE (0x42000000)
+#define BITBAND_PERIPH(a,b) ((volatile bool*) \
+    ((BITBAND_PERIPH_BASE + (((uint32_t)(a))-BITBAND_PERIPH_REF)*32 + ((b)*4))))
 
 /**
   * @}

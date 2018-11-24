@@ -56,11 +56,13 @@ void lcd_update(void);
 
 // turn on and off segments
 #define LCD_SEGON(seg) \
-    (lcd_segment_buffer[LCD_RAM(seg)] |= LCD_SMASK_ON(seg))
+    LCD_SEGSET(seg, 1)
 #define LCD_SEGOFF(seg) \
-    (lcd_segment_buffer[LCD_RAM(seg)] &= LCD_SMASK_OFF(seg))
+    LCD_SEGSET(seg, 0)
+// bit banding enables us to access the segment buffer as just
+// a bit array (a 'seg' is just a bit index)
 #define LCD_SEGSET(seg, val)\
-    (val ? LCD_SEGON(seg) : LCD_SEGOFF(seg))
+    do {*BITBAND_SRAM(lcd_segment_buffer, (seg)) = (val); } while(0)
 
 // clear all the units and powers on the selected screen
 void lcd_clear_units_powers(lcd_screen_t which);
