@@ -217,6 +217,27 @@ typedef enum
 /** @addtogroup Exported_macros
   * @{
   */
+
+// added and modified by Thomas Watson
+
+#include <stdbool.h>
+
+// from https://stackoverflow.com/a/33851362/4805833
+#define ASSERT_COMPILE(predicate) \
+    (sizeof((char[2*!!(predicate)-1]){ 0 }))
+
+#define ASSERT_IS_CONST(X) (sizeof((char[(X)*0+1]){ 0 }) * 0 + (X))
+
+#define BITBAND_SRAM_REF (0x20000000)
+#define BITBAND_SRAM_BASE (0x22000000)
+#define BITBAND_SRAM(a,b) ((volatile bool*) \
+    ((BITBAND_SRAM_BASE + (((uint32_t)(a))-BITBAND_SRAM_REF)*32 + ((b)*4))))
+
+#define BITBAND_PERIPH_REF (0x40000000)
+#define BITBAND_PERIPH_BASE (0x42000000)
+#define BITBAND_PERIPH(a,b) ((volatile bool*) \
+    ((BITBAND_PERIPH_BASE + (((uint32_t)(a))-BITBAND_PERIPH_REF)*32 + ((b)*4))))
+
 #define SET_BIT(REG, BIT)     ((REG) |= (BIT))
 
 #define CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT))
@@ -229,23 +250,47 @@ typedef enum
 
 #define READ_REG(REG)         ((REG))
 
-#define MODIFY_REG(REG, CLEARMASK, SETMASK)  WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
+#define MODIFY_REG(REG, CLEARMASK, SETMASK)  \
+    WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
 
-#define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL))) 
+// redefined because apparently the compiler can't optimize the CLZ intrinsic
+#define POSITION_VAL(VAL) (ASSERT_IS_CONST(VAL)*0+( \
+    ((VAL) & 0x00000001) ? 0 : \
+    ((VAL) & 0x00000002) ? 1 : \
+    ((VAL) & 0x00000004) ? 2 : \
+    ((VAL) & 0x00000008) ? 3 : \
+    ((VAL) & 0x00000010) ? 4 : \
+    ((VAL) & 0x00000020) ? 5 : \
+    ((VAL) & 0x00000040) ? 6 : \
+    ((VAL) & 0x00000080) ? 7 : \
+    ((VAL) & 0x00000100) ? 8 : \
+    ((VAL) & 0x00000200) ? 9 : \
+    ((VAL) & 0x00000400) ? 10 : \
+    ((VAL) & 0x00000800) ? 11 : \
+    ((VAL) & 0x00001000) ? 12 : \
+    ((VAL) & 0x00002000) ? 13 : \
+    ((VAL) & 0x00004000) ? 14 : \
+    ((VAL) & 0x00008000) ? 15 : \
+    ((VAL) & 0x00010000) ? 16 : \
+    ((VAL) & 0x00020000) ? 17 : \
+    ((VAL) & 0x00040000) ? 18 : \
+    ((VAL) & 0x00080000) ? 19 : \
+    ((VAL) & 0x00100000) ? 20 : \
+    ((VAL) & 0x00200000) ? 21 : \
+    ((VAL) & 0x00400000) ? 22 : \
+    ((VAL) & 0x00800000) ? 23 : \
+    ((VAL) & 0x01000000) ? 24 : \
+    ((VAL) & 0x02000000) ? 25 : \
+    ((VAL) & 0x04000000) ? 26 : \
+    ((VAL) & 0x08000000) ? 27 : \
+    ((VAL) & 0x10000000) ? 28 : \
+    ((VAL) & 0x20000000) ? 29 : \
+    ((VAL) & 0x40000000) ? 30 : \
+    ((VAL) & 0x80000000) ? 31 : 32))
 
-// added by Thomas Watson
+#define POSITION_VAL_VARYING(VAL) (__CLZ(__RBIT((VAL))))
 
-#include <stdbool.h>
-
-#define BITBAND_SRAM_REF (0x20000000)
-#define BITBAND_SRAM_BASE (0x22000000)
-#define BITBAND_SRAM(a,b) ((volatile bool*) \
-    ((BITBAND_SRAM_BASE + (((uint32_t)(a))-BITBAND_SRAM_REF)*32 + ((b)*4))))
-
-#define BITBAND_PERIPH_REF (0x40000000)
-#define BITBAND_PERIPH_BASE (0x42000000)
-#define BITBAND_PERIPH(a,b) ((volatile bool*) \
-    ((BITBAND_PERIPH_BASE + (((uint32_t)(a))-BITBAND_PERIPH_REF)*32 + ((b)*4))))
+// end added and modified
 
 /**
   * @}
