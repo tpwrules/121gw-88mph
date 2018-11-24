@@ -22,6 +22,8 @@
 
 #include "system/timer.h"
 
+#include "hardware/buttons.h"
+
 // number of milliseconds since timer was inited
 volatile uint32_t timer_1ms_ticks = 0;
 // number of 10 millisecond periods since timer was inited
@@ -93,4 +95,6 @@ void TIM6_IRQHandler(void) {
     TIM6->SR = 0;
 
     timer_10ms_ticks++;
+
+    btn_process();
 }

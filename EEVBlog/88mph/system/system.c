@@ -23,9 +23,8 @@
 #include "system/system.h"
 
 #include "system/timer.h"
-
 #include "hardware/lcd.h"
-
+#include "hardware/buttons.h"
 #include "acquisition/acquisition.h"
 #include "acquisition/acq_modes.h"
 #include "acquisition/reading.h"
@@ -42,6 +41,8 @@ void sys_main_loop(void) {
     acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d0000);
     int submode = 0;
 
+    button_t curr_button = BTN_NONE;
+
     while (1) {
         int new_submode = (HAL_GetTick()/1000)%4;
         if (submode != new_submode) {
@@ -56,5 +57,14 @@ void sys_main_loop(void) {
 
             lcd_update();
         }
+
+        button_t new_button = btn_get_new();
+        if (new_button != BTN_NONE)
+            curr_button = new_button;
+
+        reading_t r;
+        r.millicounts = ((int32_t)curr_button) * 1000;
+        r.millicounts += ((int32_t)btn_get_rsw()) * 100000;
+        lcd_put_reading(LCD_SCREEN_SUB, r);
     }
 }
