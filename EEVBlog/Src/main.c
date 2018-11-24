@@ -471,12 +471,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : R_LowZ_Pin R_VOLTS_Pin R_mV_TEMP_Pin R_Hz_Duty_Pin 
-                           R_O_B_D_C_Pin R_VA_Pin R_uA_Pin R_mA_A_Pin 
+  /*Configure GPIO pins : R_mA_A_Pin R_uA_Pin R_VA_Pin R_O_B_D_C_Pin 
+                           R_Hz_Duty_Pin R_mV_TEMP_Pin R_VOLTS_Pin R_LowZ_Pin 
                            B_MODE_Pin B_SETUP_Pin B_MINMAX_Pin B_MEM_Pin 
                            B_RANGE_Pin B_HOLD_Pin B_REL_Pin B_PEAK_Pin */
-  GPIO_InitStruct.Pin = R_LowZ_Pin|R_VOLTS_Pin|R_mV_TEMP_Pin|R_Hz_Duty_Pin 
-                          |R_O_B_D_C_Pin|R_VA_Pin|R_uA_Pin|R_mA_A_Pin 
+  GPIO_InitStruct.Pin = R_mA_A_Pin|R_uA_Pin|R_VA_Pin|R_O_B_D_C_Pin 
+                          |R_Hz_Duty_Pin|R_mV_TEMP_Pin|R_VOLTS_Pin|R_LowZ_Pin 
                           |B_MODE_Pin|B_SETUP_Pin|B_MINMAX_Pin|B_MEM_Pin 
                           |B_RANGE_Pin|B_HOLD_Pin|B_REL_Pin|B_PEAK_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
