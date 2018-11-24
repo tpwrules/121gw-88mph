@@ -16,45 +16,25 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
+#ifndef SYSTEM_TIMER_H
+#define SYSTEM_TIMER_H
+
 #include <stdint.h>
-#include <stdbool.h>
-#include "stm32l1xx.h"
 
-#include "system/system.h"
+// this file handles the two system timers
+// 1ms and 10ms
 
-#include "system/timer.h"
+void timer_init(void);
+void timer_deinit(void);
 
-#include "hardware/lcd.h"
+// callback for 1ms timer
+void HAL_SYSTICK_Callback(void);
+// callback for 10ms timer
+void TIM3_IRQHandler(void);
 
-#include "acquisition/acquisition.h"
-#include "acquisition/acq_modes.h"
-#include "acquisition/reading.h"
+// number of milliseconds since timer was inited
+extern volatile uint32_t timer_1ms_ticks;
+// number of 10 millisecond periods since timer was inited
+extern volatile uint32_t timer_10ms_ticks;
 
-void sys_main_loop(void) {
-    __enable_irq();
-    acq_init();
-    timer_init();
-
-    lcd_put_str(LCD_SCREEN_SUB, "hello");
-    lcd_put_str(LCD_SCREEN_MAIN, "world");
-    lcd_update();
-
-    acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d0000);
-    int submode = 0;
-
-    while (1) {
-        int new_submode = (HAL_GetTick()/1000)%4;
-        if (submode != new_submode) {
-            submode = new_submode;
-            acq_set_submode(submode);
-        }
-
-        reading_t reading;
-
-        if (acq_get_reading(0, &reading)) {
-            lcd_put_reading(LCD_SCREEN_MAIN, reading);
-
-            lcd_update();
-        }
-    }
-}
+#endif
