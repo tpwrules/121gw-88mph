@@ -17,10 +17,11 @@
  *****************************************************************************/
 
 #ifndef ACQUISITION_ACQ_MODE_BASIC_H
-#define ACQUISITION_ACQ_MODE_BASIC
+#define ACQUISITION_ACQ_MODE_BASIC_H
 
 #include <stdint.h>
-#include "acq_modes.h"
+
+#include "acquisition/acq_modes.h"
 
 // this file defines the acquisition mode funcs for the boring modes
 // volts, etc

@@ -18,11 +18,10 @@
 
 // pointers to the acquisition mode functions
 
-#include <stdint.h>
-#include "acq_modes.h"
+#include "acquisition/acq_modes.h"
 
-#include "acquisition.h"
-#include "acq_mode_basic.h"
+#include "acquisition/acquisition.h"
+#include "acquisition/acq_mode_basic.h"
 
 const acq_mode_func acq_mode_funcs[2] = {
     // ACQ_MODE_MISC

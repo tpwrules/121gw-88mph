@@ -60,8 +60,8 @@
 #define HY_REG_INT_AD2 (0x02)
 #define HY_REG_INT_CT (0x01)
 
-void hy_init();
-void hy_deinit();
+void hy_init(void);
+void hy_deinit(void);
 
 // the EXTI3 interrupt is triggered when the chip asserts its IRQ
 void EXTI3_IRQHandler(void);
@@ -72,7 +72,7 @@ void EXTI3_IRQHandler(void);
 // if enable is false, the IRQ state is not changed
 void hy_enable_irq(bool enable);
 // disable IRQs. previous IRQ state is returned
-bool hy_disable_irq();
+bool hy_disable_irq(void);
 
 
 // read a series of registers from the chip

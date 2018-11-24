@@ -22,19 +22,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "reading.h"
-#include "acq_modes.h"
+#include "acquisition/reading.h"
+#include "acquisition/acq_modes.h"
 
 // turn on the acquisition engine
-void acq_init();
+void acq_init(void);
 // turn off the acquisition engine
-void acq_deinit();
+void acq_deinit(void);
 
 // called when the HY3131 triggers an interrupt
-// it's okay if there's actually nothing to do
-void acq_process_hy_int();
+// it's okay if it didn't really
+void acq_process_hy_int(void);
 
-// set the HY int enable register
+// set the HY interrupt mask register
 void acq_set_int_mask(uint8_t mask);
 
 

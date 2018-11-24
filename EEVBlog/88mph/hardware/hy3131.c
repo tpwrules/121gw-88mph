@@ -18,15 +18,15 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "stm32l1xx.h"
 
-#include "hy3131.h"
+#include "hardware/hy3131.h"
 
-#include "main.h" // for cube pin defs
-#include "gpio.h"
+#include "hardware/gpio.h"
 
 #include "acquisition/acquisition.h"
 
-void hy_init() {
+void hy_init(void) {
     // set up the interrupt handler
     // the chip DO line is connected to PF3, so it's on the EXTI3 line
 
@@ -45,7 +45,7 @@ void hy_init() {
     SET_BIT(EXTI->IMR, EXTI_IMR_MR3);
 }
 
-void hy_deinit() {
+void hy_deinit(void) {
     hy_enable_irq(false);
 }
 
@@ -54,10 +54,12 @@ static volatile bool irq_enabled = false;
 
 // chip interrupt is connected to EXTI3
 void EXTI3_IRQHandler(void) {
-    // tell EXTI we got this interrupt
+    // acknowledge this interrupt in EXTI
     EXTI->PR = EXTI_PR_PR3;
 
-    // even if interrupt didn't happen, it's okay to call the acq handler
+    // trust that the HY wants us
+    // if it didn't actually interrupt us, it's safe to call
+    // this function anyway
     acq_process_hy_int();
 }
 
@@ -82,7 +84,7 @@ void hy_enable_irq(bool enable) {
     __enable_irq();
 }
 
-bool hy_disable_irq() {
+bool hy_disable_irq(void) {
     __disable_irq();
     bool previous = irq_enabled;
     irq_enabled = false;
@@ -99,7 +101,7 @@ static void spinloop(uint32_t times) {
     while (detimes--);
 }
 
-static void toggle_clock() {
+static void toggle_clock(void) {
     spinloop(1);
     GPIO_PINSET(HY_CK);
     spinloop(1);
@@ -114,7 +116,7 @@ static void send_byte(uint8_t byte) {
     }
 }
 
-static uint8_t recv_byte() {
+static uint8_t recv_byte(void) {
     uint8_t byte = 0;
     for (int bit=0; bit<8; bit++) {
         // toggle clock before reading bit because there is a 1 bit

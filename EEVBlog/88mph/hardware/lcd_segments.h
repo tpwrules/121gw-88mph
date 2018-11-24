@@ -40,6 +40,11 @@
 #define LCD_SMASK_OFF(seg) ((uint32_t)(~LCD_SMASK_ON(seg)))
 
 
+// the hardware doesn't support a segment here, so this can be used
+// as a nonexistent segment sentinel
+// however, the hardware technically doesn't want you to turn it on
+#define SEG_NONE                  (0xFF)
+
 // screen icons, in no particular order
 #define SEG_ICON_REL              _LCD_SEGDEF(0, 0)
 #define SEG_ICON_MEM              _LCD_SEGDEF(0, 16)

@@ -17,19 +17,16 @@
  *****************************************************************************/
 
 #include <stdint.h>
-#include <stdio.h>
+#include <stdbool.h>
+#include "stm32l1xx.h"
 
-#include "stm32l1xx_hal.h"
+#include "system/system.h"
 
 #include "hardware/lcd.h"
-#include "hardware/hy3131.h"
-#include "hardware/gpio.h"
 
 #include "acquisition/acquisition.h"
 #include "acquisition/acq_modes.h"
 #include "acquisition/reading.h"
-
-#include "system.h"
 
 void sys_main_loop(void) {
     __enable_irq();
@@ -52,7 +49,6 @@ void sys_main_loop(void) {
         reading_t reading;
 
         if (acq_get_reading(0, &reading)) {
-            // now put it where it belongs
             lcd_put_reading(LCD_SCREEN_MAIN, reading);
 
             lcd_update();

@@ -23,7 +23,10 @@
 // because I'm not so fond of the HAL ones
 // it's designed to work with cube-generated pin names
 
-#include "stm32l1xx_hal.h"
+#include "stm32l1xx.h"
+
+// get all the cube pin definitions
+#include "main.h"
 
 // set a pin to 1
 #define GPIO_PINSET(pin) \

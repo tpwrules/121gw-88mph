@@ -17,18 +17,19 @@
  *****************************************************************************/
 
 #include <stdint.h>
-
 #include "stm32l1xx.h"
 
-#include "lcd.h"
-#include "lcd_tables.h"
+#include "hardware/lcd.h"
+
+#include "hardware/lcd_segments.h"
+#include "hardware/lcd_tables.h"
 
 #include "acquisition/reading.h"
 
 uint32_t lcd_segment_buffer[8];
 
 // transfer the LCD buffer to LCD RAM and trigger an update
-void lcd_update() {
+void lcd_update(void) {
     // wait for any pending update to be completed
     while (LCD->SR & LCD_SR_UDR);
     // fill the LCD RAM with our buffer
@@ -43,13 +44,13 @@ void lcd_update() {
 void lcd_clear_units_powers(lcd_screen_t which) {
     for (int i=0; i<11; i++) {
         uint8_t seg = lcd_unit_icons[which][i];
-        if (seg != 0xFF)
+        if (seg != SEG_NONE)
             LCD_SEGOFF(seg);
     }
 
     for (int i=0; i<6; i++) {
         uint8_t seg = lcd_power_icons[which][i];
-        if (seg != 0xFF)
+        if (seg != SEG_NONE)
             LCD_SEGOFF(seg);
     }
 
@@ -61,7 +62,7 @@ void lcd_clear_units_powers(lcd_screen_t which) {
 // set a character on one of the LCD's 7 segment displays
 void lcd_set_char(lcd_digit_t where, char c) {
     // first step: look up the char and get its segments
-    uint8_t segs;
+    uint8_t segs; // in xGFEDCBA order
     if (c >= 'A' && c <= 'Z') {
         segs = lcd_7seg_font[c-'A'+10];
     } else if (c >= 'a' && c <= 'z') {
@@ -136,7 +137,7 @@ void lcd_put_reading(lcd_screen_t which, reading_t reading) {
 
     // if there's a unit icon, turn it on
     uint8_t seg = lcd_unit_icons[which][reading.unit];
-    if (seg != 0xFF) {
+    if (seg != SEG_NONE) {
         LCD_SEGON(seg);
     }
 
@@ -154,7 +155,7 @@ void lcd_put_reading(lcd_screen_t which, reading_t reading) {
     LCD_SEGON(lcd_decimal_points[which][decimal_loc]);
     // and then the power icon, if it exists
     seg = lcd_power_icons[which][power];
-    if (seg != 0xFF) {
+    if (seg != SEG_NONE) {
         LCD_SEGON(seg);
     }
 }

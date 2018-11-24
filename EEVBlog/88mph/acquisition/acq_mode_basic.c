@@ -17,11 +17,14 @@
  *****************************************************************************/
 
 #include <stdint.h>
-#include "acq_mode_basic.h"
-#include "acq_modes.h"
-#include "acquisition.h"
+#include <stdbool.h>
 
-#include "reading.h"
+#include "acquisition/acq_mode_basic.h"
+
+#include "acquisition/acq_modes.h"
+#include "acquisition/acquisition.h"
+#include "acquisition/reading.h"
+
 #include "hardware/hy3131.h"
 
 // registers for volts dc
@@ -52,7 +55,7 @@ void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
             // disable chip interrupts so we don't get re-entered
             hy_enable_irq(false);
             // program new register set into the HY3131
-            submode = (int)value;
+            submode = (acq_submode_t)value;
             hy_write_regs(0x20, 20,
                 &volts_dc_regs[submode][0]);
             // enable the AD1 interrupt so we can display the measurement

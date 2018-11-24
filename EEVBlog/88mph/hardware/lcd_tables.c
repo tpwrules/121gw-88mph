@@ -18,10 +18,9 @@
 
 #include <stdint.h>
 
-#include "lcd_tables.h"
-#include "lcd_segments.h"
+#include "hardware/lcd_tables.h"
 
-#include "acquisition/reading.h"
+#include "hardware/lcd_segments.h"
 
 // table to map letters and numbers to segments
 // each byte is in xGFEDCBA order
@@ -67,17 +66,17 @@ const uint8_t lcd_7seg_segments[10][7] = {
 const uint8_t lcd_unit_icons[2][11] = {
     // on subscreen
     {
-        0xFF, SEG_SS_AMPS, 0xFF, 0xFF,
+        SEG_NONE, SEG_SS_AMPS, SEG_NONE, SEG_NONE,
         SEG_SS_HERTZ, SEG_SS_nS, SEG_SS_OHMS,
-        SEG_SS_VOLTS, 0xFF, 0xFF,
+        SEG_SS_VOLTS, SEG_NONE, SEG_NONE,
         SEG_SS_dB
     },
     // and main screen
     {
-        0xFF, SEG_MS_AMPS, SEG_MS_DUTY_PERCENT, SEG_MS_FARADS,
+        SEG_NONE, SEG_MS_AMPS, SEG_MS_DUTY_PERCENT, SEG_MS_FARADS,
         SEG_MS_HERTZ, SEG_MS_mSEC, SEG_MS_OHMS,
         SEG_MS_VOLTS, SEG_MS_DEG_C, SEG_MS_DEG_F,
-        0xFF
+        SEG_NONE
     }
 };
 
@@ -86,10 +85,10 @@ const uint8_t lcd_unit_icons[2][11] = {
 // 0 = subscreen, 1 = main screen
 const uint8_t lcd_power_icons[2][6] = {
     // subscreen
-    {0xFF, 0xFF, SEG_SS_MILLI, 0xFF, SEG_SS_KILO, 0xFF},
+    {SEG_NONE, SEG_NONE, SEG_SS_MILLI, SEG_NONE, SEG_SS_KILO, SEG_NONE},
     // main screen
     {SEG_MS_NANO, SEG_MS_MICRO, SEG_MS_MILLI,
-        0xFF, SEG_MS_KILO, SEG_MS_MEGA}
+        SEG_NONE, SEG_MS_KILO, SEG_MS_MEGA}
 };
 
 // table to map exponents to decimal points

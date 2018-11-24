@@ -25,8 +25,6 @@
 
 #include <stdint.h>
 
-#include "lcd_segments.h"
-
 #include "acquisition/reading.h"
 
 extern uint32_t lcd_segment_buffer[8];
@@ -54,7 +52,7 @@ typedef enum {
 } lcd_screen_t;
 
 // update the LCD from the segment buffer
-void lcd_update();
+void lcd_update(void);
 
 // turn on and off segments
 #define LCD_SEGON(seg) \
