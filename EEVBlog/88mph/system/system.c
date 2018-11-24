@@ -29,9 +29,9 @@
 #include "acquisition/acq_modes.h"
 #include "acquisition/reading.h"
 
-#include "88mph.h"
+#include "system.h"
 
-void main_88mph(void) {
+void sys_main_loop(void) {
     __enable_irq();
     acq_init();
 

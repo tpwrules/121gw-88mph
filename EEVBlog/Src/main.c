@@ -53,7 +53,7 @@
 
 /* USER CODE BEGIN Includes */
 
-#include "88mph.h"
+#include "system/system.h"
 
 /* USER CODE END Includes */
 
@@ -145,7 +145,7 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
-  main_88mph();
+  sys_main_loop();
 
   /* USER CODE END 2 */
 

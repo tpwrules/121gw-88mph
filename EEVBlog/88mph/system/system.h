@@ -16,11 +16,11 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
-#ifndef SRC_88MPH_H
-#define SRC_88MPH_H
+#ifndef SYSTEM_SYSTEM_H
+#define SYSTEM_SYSTEM_H
 
 // this file has the main loop and the timer handlers
 
-void main_88mph(void);
+void sys_main_loop(void);
 
 #endif
