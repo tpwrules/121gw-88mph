@@ -49,7 +49,7 @@ typedef struct {
 } button_mem_t;
 
 // same order as the typedef
-static const button_data_t button_data[16] = {
+static const button_data_t button_data[18] = {
     // top row, left to right
     // BTN_RANGE
     {GPIO_PINGET_BITBAND_ADDR(B_RANGE), true, 5, 5},
@@ -69,6 +69,12 @@ static const button_data_t button_data[16] = {
     {GPIO_PINGET_BITBAND_ADDR(B_MEM), true, 5, 5},
     // BTN_SETUP
     {GPIO_PINGET_BITBAND_ADDR(B_SETUP), true, 5, 5},
+
+    // if something is in the corresponding jack
+    // BTN_JACKDET_mA
+    {GPIO_PINGET_BITBAND_ADDR(B_FUSE_mA), false, 20, 20},
+    // BTN_JACKDET_A
+    {GPIO_PINGET_BITBAND_ADDR(B_FUSE_A), false, 20, 20},
 
     // range switch, left to right
     // BTN_RSW_LowZ
@@ -90,7 +96,7 @@ static const button_data_t button_data[16] = {
 };
 
 // also the same order as the typedef
-static button_mem_t button_mem[16];
+static button_mem_t button_mem[18];
 
 // called every 10ms to do all the magic
 void btn_process(void) {
@@ -143,7 +149,7 @@ void btn_process(void) {
 button_t btn_get_new(void) {
     button_t the_button = BTN_NONE;
     __disable_irq();
-    for (int bi=0; bi<8; bi++) {
+    for (int bi=0; bi<10; bi++) {
         button_state_t state = button_mem[bi].state;
         if (state & 1) { // is 'just'
             // turn off 'just'
@@ -156,10 +162,12 @@ button_t btn_get_new(void) {
     return the_button;
 }
 
+// get the position of the range switch
+// returns BTN_NONE if 0 or more than 1 switch position is selected
 button_t btn_get_rsw(void) {
     button_t the_button = BTN_NONE;
     __disable_irq();
-    for (int bi=8; bi<16; bi++) {
+    for (int bi=10; bi<18; bi++) {
         button_state_t state = button_mem[bi].state;
         if (state & 1) { // is 'just'
             // turn off 'just'

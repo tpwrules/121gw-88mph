@@ -63,6 +63,10 @@ typedef enum {
     BTN_MEM,
     BTN_SETUP,
 
+    // if something is in the corresponding jack
+    BTN_JACKDET_mA,
+    BTN_JACKDET_A,
+
     // range switch, left to right
     BTN_RSW_LowZ,
     BTN_RSW_V,
