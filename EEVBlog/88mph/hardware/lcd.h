@@ -51,8 +51,12 @@ typedef enum {
     LCD_SCREEN_MAIN=1
 } lcd_screen_t;
 
-// update the LCD from the segment buffer
-void lcd_update(void);
+// ask for an update from the segment buffer to be done
+void lcd_queue_update(void);
+
+// try and update the display every 10ms
+// called by the 10ms timer routine
+void lcd_10ms_update_if_necessary(void);
 
 // turn on and off segments
 #define LCD_SEGON(seg) \

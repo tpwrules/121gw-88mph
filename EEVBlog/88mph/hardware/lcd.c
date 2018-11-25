@@ -17,6 +17,7 @@
  *****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "stm32l1xx.h"
 
 #include "hardware/lcd.h"
@@ -28,16 +29,26 @@
 
 uint32_t lcd_segment_buffer[8];
 
-// transfer the LCD buffer to LCD RAM and trigger an update
-void lcd_update(void) {
-    // wait for any pending update to be completed
-    while (LCD->SR & LCD_SR_UDR);
+static volatile bool lcd_needs_updating = false;
+
+void lcd_queue_update(void) {
+    lcd_needs_updating = true;
+}
+
+// try and update the display every 10ms
+// called by the 10ms timer routine
+void lcd_10ms_update_if_necessary(void) {
+    // if the LCD is currently updating, we can't touch it
+    // so return and it'll get done next interrupt
+    if (LCD->SR & LCD_SR_UDR)
+        return;
     // fill the LCD RAM with our buffer
     for (int i=0; i<8; i++) {
         LCD->RAM[i] = lcd_segment_buffer[i];
     }
     // and set the bit to trigger a new update
     LCD->SR |= LCD_SR_UDR;
+    lcd_needs_updating = false;
 }
 
 // turn off all the units on the selected screen

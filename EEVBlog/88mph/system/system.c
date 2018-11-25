@@ -74,7 +74,7 @@ void sys_handle_job_system(void) {
     if (acq_get_reading(0, &reading)) {
         lcd_put_reading(LCD_SCREEN_MAIN, reading);
 
-        lcd_update();
+        lcd_queue_update();
     }
 
     button_state_t new_state;

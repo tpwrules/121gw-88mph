@@ -24,6 +24,7 @@
 
 #include "system/job.h"
 #include "hardware/buttons.h"
+#include "hardware/lcd.h"
 
 // number of milliseconds since timer was inited
 volatile uint32_t timer_1ms_ticks = 0;
@@ -95,6 +96,8 @@ void timer_handle_job_10ms_timer(void) {
     timer_10ms_ticks++;
 
     btn_process();
+
+    lcd_10ms_update_if_necessary();
 
     // the system job is surely interested in what's changed as a result
     job_schedule(JOB_SYSTEM);
