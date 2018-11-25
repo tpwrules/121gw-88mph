@@ -60,8 +60,7 @@ void timer_init(void) {
     TIM6->CR1 = TIM_CR1_URS | // only trigger update on overflow
                 TIM_CR1_CEN; // turn on counting
 
-    // enable the timer interrupt
-    NVIC_EnableIRQ(TIM6_IRQn);
+    // the timer will be enabled when its job is enabled
 }
 
 void timer_deinit(void) {
@@ -71,11 +70,10 @@ void timer_deinit(void) {
     timer_is_inited = false;
     __enable_irq();
 
-    // turn off the timer IRQ
-    NVIC_DisableIRQ(TIM6_IRQn);
-    NVIC_ClearPendingIRQ(TIM6_IRQn);
+    // turn off the timer job
+    job_disable(JOB_10MS_TIMER);
 
-    // and turn off its clock
+    // and turn off the timer hardware clock
     __HAL_RCC_TIM6_CLK_DISABLE();
 }
 
@@ -90,8 +88,7 @@ void HAL_SYSTICK_Callback(void) {
     timer_1ms_ticks++;
 }
 
-// callback for 10ms timer
-void TIM6_IRQHandler(void) {
+void timer_handle_job_10ms_timer(void) {
     // acknowledge interrupt
     TIM6->SR = 0;
 

@@ -30,6 +30,10 @@
 // this module also sets priorities for all the interrupts we do use
 
 typedef enum {
+    // this one must be enabled/disabled through hy_enable_irq
+    // its handler is in hardware/hy3131.c
+    JOB_ACQUISITION = EXTI3_IRQn,
+    JOB_10MS_TIMER = TIM6_IRQn,
     JOB_SYSTEM = USB_HP_IRQn
 } job_t;
 
@@ -54,5 +58,8 @@ void job_schedule(job_t job);
 // catch the interrupts so we can direct them to their jobs
 // JOB_SYSTEM
 void USB_HP_IRQHandler(void);
+
+// JOB_10MS_TIMER
+void TIM6_IRQHandler(void);
 
 #endif

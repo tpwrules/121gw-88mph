@@ -47,6 +47,7 @@ void acq_init(void) {
     // cause there should be no previous mode func to call
     curr_acq_mode_func = acq_mode_funcs[ACQ_MODE_MISC];
     curr_acq_mode_func(ACQ_EVENT_START, (int64_t)ACQ_MODE_MISC_SUBMODE_OFF);
+    // the off mode turns off the HY interrupts
 }
 
 // turn off the acquisition engine
@@ -63,9 +64,9 @@ void acq_deinit(void) {
     GPIO_PINRST(HW_PWR_CTL);
 }
 
-// called when the HY3131 triggers an interrupt
-// it's okay if there's actually nothing to do
-void acq_process_hy_int(void) {
+// do the acquisition job
+// check the HY3131 and calculate new acquisitions
+void acq_handle_job_acquisition(void) {
     uint8_t regbuf[5];
 
     // read which interrupts are pending

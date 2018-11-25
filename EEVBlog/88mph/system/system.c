@@ -37,8 +37,14 @@ void sys_main_loop(void) {
     timer_init();
 
     // enable all the jobs so the system starts working
+    // do this with interrupts disabled so we can ensure we get
+    // a chance to turn them all on!
+    __disable_irq();
+    job_enable(JOB_10MS_TIMER);
     job_enable(JOB_SYSTEM);
+    __enable_irq();
 
+    // the acquisition job will be enabled in here
     acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d0000);
 
     while (1) {

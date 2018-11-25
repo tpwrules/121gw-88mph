@@ -35,11 +35,10 @@ void job_init(void) {
 
     // next we want the 10ms timer. it's pretty fast and doesn't do much
     // it's handled by TIM6
-    NVIC_SetPriority(TIM6_IRQn, 1);
+    NVIC_SetPriority(JOB_10MS_TIMER, 1);
 
     // after the timers, handling acquisition is the most important
-    // that gets triggered by the HY causing an EXT3 interrupt
-    NVIC_SetPriority(EXTI3_IRQn, 5);
+    NVIC_SetPriority(JOB_ACQUISITION, 5);
 
     // then the system job
     // it keeps the UI responsive
@@ -54,6 +53,7 @@ void job_deinit(void) {
     // all at once, so things don't get weird
     __disable_irq();
     job_disable(JOB_SYSTEM);
+    job_disable(JOB_10MS_TIMER);
     __enable_irq();
 }
 
@@ -83,4 +83,10 @@ void job_schedule(job_t job) {
 #include "system/system.h"
 void USB_HP_IRQHandler(void) {
     sys_handle_job_system();
+}
+
+// JOB_10MS_TIMER
+#include "system/timer.h"
+void TIM6_IRQHandler(void) {
+    timer_handle_job_10ms_timer();
 }

@@ -30,9 +30,9 @@ void acq_init(void);
 // turn off the acquisition engine
 void acq_deinit(void);
 
-// called when the HY3131 triggers an interrupt
-// it's okay if it didn't really
-void acq_process_hy_int(void);
+// do the acquisition job
+// check the HY3131 and calculate new acquisitions
+void acq_handle_job_acquisition(void);
 
 // set the HY interrupt mask register
 void acq_set_int_mask(uint8_t mask);
