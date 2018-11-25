@@ -42,6 +42,7 @@ void sys_main_loop(void) {
     int submode = 0;
 
     button_t curr_button = BTN_NONE;
+    button_t curr_state = BTN_RELEASED;
 
     while (1) {
         int new_submode = (HAL_GetTick()/1000)%4;
@@ -58,13 +59,17 @@ void sys_main_loop(void) {
             lcd_update();
         }
 
-        button_t new_button = btn_get_new();
-        if (new_button != BTN_NONE)
+        button_state_t new_state;
+        button_t new_button = btn_get_new(&new_state);
+        if (new_button != BTN_NONE) {
             curr_button = new_button;
+            curr_state = new_state;
+        }
 
         reading_t r;
         r.millicounts = ((int32_t)curr_button) * 1000;
-        r.millicounts += ((int32_t)btn_get_rsw()) * 100000;
+        r.millicounts += ((int32_t)curr_state) * 100000;
+        r.millicounts += ((int32_t)btn_get_rsw()) * 1000000;
         lcd_put_reading(LCD_SCREEN_SUB, r);
     }
 }

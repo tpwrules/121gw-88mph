@@ -26,22 +26,14 @@
 // in 10ms units, max 255
 #define BTN_HELD_TIME (100) // 1 second
 
-// JUST_ means the state is new
-// when read, it goes to the corresponding non-JUST state
-// do not change this!!
 typedef enum {
     // finger off the button
     BTN_RELEASED = 0,
-    BTN_JUST_RELEASED = 1,
-
     // finger on the button
-    BTN_PRESSED = 2,
-    BTN_JUST_PRESSED = 3,
-
+    BTN_PRESSED = 1,
     // finger on the button for at least BTN_HELD_TIME
     // (if the button can be held)
-    BTN_HELD = 4,
-    BTN_JUST_HELD = 5
+    BTN_HELD = 2,
 } button_state_t;
 
 // the buttons! finally
@@ -81,13 +73,16 @@ typedef enum {
 // called every 10ms to do all the magic
 void btn_process(void);
 
-// returns the first button that has a 'just' state
-// or BTN_NONE if there is no button with a 'just' state
-// also sets it to the corresponding not-'just' state
-// only works for the buttony buttons, not the range switch
-button_t btn_get_new(void);
+// looks at the non-range-switch buttons and returns the first one whose state
+// is new. it then clears the new flag and stores the state in new_state
+// if there is no such button, returns BTN_NONE and does not change new_state
+button_t btn_get_new(button_state_t* new_state);
 
-// get the position of the range switch
+// returns the state of the corresponding button and clears the new flag
+// always returns BTN_RELEASED for BTN_NONE
+button_state_t btn_get_state(button_t button);
+
+// get the position of the range switch.
 // returns BTN_NONE if 0 or more than 1 switch position is selected
 button_t btn_get_rsw(void);
 
