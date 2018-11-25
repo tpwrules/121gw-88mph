@@ -22,6 +22,7 @@
 
 #include "system/timer.h"
 
+#include "system/job.h"
 #include "hardware/buttons.h"
 
 // number of milliseconds since timer was inited
@@ -97,4 +98,7 @@ void TIM6_IRQHandler(void) {
     timer_10ms_ticks++;
 
     btn_process();
+
+    // the system job is surely interested in what's changed as a result
+    job_schedule(JOB_SYSTEM);
 }

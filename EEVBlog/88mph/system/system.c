@@ -22,6 +22,7 @@
 
 #include "system/system.h"
 
+#include "system/job.h"
 #include "system/timer.h"
 #include "hardware/lcd.h"
 #include "hardware/buttons.h"
@@ -31,45 +32,64 @@
 
 void sys_main_loop(void) {
     __enable_irq();
+    job_init();
     acq_init();
     timer_init();
 
-    lcd_put_str(LCD_SCREEN_SUB, "hello");
-    lcd_put_str(LCD_SCREEN_MAIN, "world");
-    lcd_update();
+    // enable all the jobs so the system starts working
+    job_enable(JOB_SYSTEM);
 
     acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d0000);
-    int submode = 0;
-
-    button_t curr_button = BTN_NONE;
-    button_t curr_state = BTN_RELEASED;
 
     while (1) {
-        int new_submode = (HAL_GetTick()/1000)%4;
-        if (submode != new_submode) {
-            submode = new_submode;
-            acq_set_submode(submode);
-        }
-
-        reading_t reading;
-
-        if (acq_get_reading(0, &reading)) {
-            lcd_put_reading(LCD_SCREEN_MAIN, reading);
-
-            lcd_update();
-        }
-
-        button_state_t new_state;
-        button_t new_button = btn_get_new(&new_state);
-        if (new_button != BTN_NONE) {
-            curr_button = new_button;
-            curr_state = new_state;
-        }
-
-        reading_t r;
-        r.millicounts = ((int32_t)curr_button) * 1000;
-        r.millicounts += ((int32_t)curr_state) * 100000;
-        r.millicounts += ((int32_t)btn_get_rsw()) * 1000000;
-        lcd_put_reading(LCD_SCREEN_SUB, r);
+        // the main loop just sleeps
+        // we trust an interrupt will arrive and wake us up
+        // if there is something interesting to do
+        __WFI();
     }
+}
+
+void sys_handle_job_system(void) {
+    // the system job basically does the UI
+    // and routes around measurements
+    static int submode = 0;
+
+    static button_t curr_button = BTN_NONE;
+    static button_t curr_state = BTN_RELEASED;
+
+    int new_submode = (HAL_GetTick()/1000)%4;
+    if (submode != new_submode) {
+        submode = new_submode;
+        acq_set_submode(submode);
+    }
+
+    reading_t reading;
+
+    if (acq_get_reading(0, &reading)) {
+        lcd_put_reading(LCD_SCREEN_MAIN, reading);
+
+        lcd_update();
+    }
+
+    button_state_t new_state;
+    button_t new_button = btn_get_new(&new_state);
+    if (new_button != BTN_NONE) {
+        curr_button = new_button;
+        curr_state = new_state;
+    }
+
+    reading_t r = {
+        // millicounts
+        (((int32_t)curr_button) * 1000)+
+        (((int32_t)curr_state) * 100000)+
+        (((int32_t)btn_get_rsw()) * 1000000),
+        0, // time_ms
+        RDG_UNIT_NONE, // unit
+        RDG_EXPONENT_NONE, // exponent
+        RDG_DECIMAL_10000 // decimal
+    };
+    r.millicounts = ((int32_t)curr_button) * 1000;
+    r.millicounts += ((int32_t)curr_state) * 100000;
+    r.millicounts += ((int32_t)btn_get_rsw()) * 1000000;
+    lcd_put_reading(LCD_SCREEN_SUB, r);
 }

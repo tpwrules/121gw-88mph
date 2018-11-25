@@ -16,13 +16,43 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
-#ifndef SYSTEM_SYSTEM_H
-#define SYSTEM_SYSTEM_H
+#ifndef SYSTEM_JOB_H
+#define SYSTEM_JOB_H
 
-// this file has the main loop and the timer handlers
+#include <stdint.h>
+#include <stdbool.h>
+#include "stm32l1xx.h"
 
-void sys_main_loop(void);
+// this module deals with Jobs
+// we attach specific jobs to interrupts we won't use, then use the NVIC
+// to automatically prioritize them
 
-void sys_handle_job_system(void);
+// this module also sets priorities for all the interrupts we do use
+
+typedef enum {
+    JOB_SYSTEM = USB_HP_IRQn
+} job_t;
+
+// configure the NVIC for everything, but don't enable any of the jobs
+void job_init(void);
+
+// disable all the jobs
+void job_deinit(void);
+
+// enable a specific job, so it can run if it is scheduled
+// this un-schedules the job before enabling it
+void job_enable(job_t job);
+
+// disable a specific job, so it won't run even if it is scheduled
+void job_disable(job_t job);
+
+// schedule a specific job, so it will run if it scheduled and no
+// higher priority job is running. this will only run the job once!
+void job_schedule(job_t job);
+
+
+// catch the interrupts so we can direct them to their jobs
+// JOB_SYSTEM
+void USB_HP_IRQHandler(void);
 
 #endif
