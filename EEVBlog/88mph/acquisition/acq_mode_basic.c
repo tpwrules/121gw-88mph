@@ -69,12 +69,15 @@ void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
             int32_t ad1 = (int32_t)value;
             // ad1 is already nice and sign extended
             // all we need to do is put it into a reading
-            reading_t reading;
-            // approximately calibrate by dividing by 60
-            reading.millicounts = (ad1*100)/6;
-            reading.unit = RDG_UNIT_VOLTS;
-            // conveniently, the submode is the exponent
-            reading.exponent = submode;
+            reading_t reading = {
+                // approximately calibrate by dividing by 60
+                (ad1*100)/6, // millicounts
+                RDG_UNIT_VOLTS, // unit
+                RDG_EXPONENT_NONE, // exponent
+                // conveniently, decimal point loc is the same as the submode
+                submode // decimal point
+            };
+
             // tell the new reading to the rest of the acquisition engine
             acq_set_reading(0, reading);
             break;

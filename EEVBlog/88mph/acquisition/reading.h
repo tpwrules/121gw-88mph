@@ -39,19 +39,40 @@ typedef enum {
     RDG_UNIT_dB
 } rdg_unit_t;
 
+// this controls which exponent lights up on the LCD
+// note that the table lcd_exponent_icons is in this order
+typedef enum {
+    RDG_EXPONENT_NANO=0,
+    RDG_EXPONENT_MICRO,
+    RDG_EXPONENT_MILLI,
+    RDG_EXPONENT_NONE, // no exponent
+    RDG_EXPONENT_KILO,
+    RDG_EXPONENT_MEGA
+} rdg_exponent_t;
+
+// this controls which decimal point lights up on the LCD
+// note that the table lcd_decimal_points is in this order
+typedef enum {
+    RDG_DECIMAL_1d0000=0,
+    RDG_DECIMAL_10d000,
+    RDG_DECIMAL_100d00,
+    RDG_DECIMAL_1000d0,
+    RDG_DECIMAL_10000 // no decimal
+} rdg_decimal_t;
+
 typedef struct {
     // the value of the reading
     // one count -> one least significant digit display
-    // thus the reading can be 1000 times more precise
+    // thus the reading can be 1000 times more precise in calculations
     int32_t millicounts;
     // the base unit of the reading
     rdg_unit_t unit;
-    // the exponent of the reading
-    // exponent 0 and millicounts 10000000
-    // shows 1.0000 on the display
-    // exponent of 1 would show 10.000
-    // and -1 would show 100.00 with the milli icon turned on
-    int8_t exponent;
+    // the unit's exponent and decimal position
+    // there is no requirement that these be normalized
+    // i.e. 1000.0V and 1.0000kV are both allowed, but will have different
+    // values here
+    rdg_exponent_t exponent;
+    rdg_decimal_t decimal;
 } reading_t;
 
 #endif
