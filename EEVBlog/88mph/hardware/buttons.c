@@ -22,6 +22,7 @@
 
 #include "hardware/buttons.h"
 
+#include "system/job.h"
 #include "hardware/gpio.h"
 
 // storage and data regarding all the buttons
@@ -100,6 +101,8 @@ static button_mem_t button_mem[18];
 
 // called every 10ms to do all the magic
 void btn_process(void) {
+    bool some_state_was_updated = false;
+
     for (int bi=0; bi<18; bi++) {
         const button_data_t* this_data = &button_data[bi];
         button_mem_t* this_mem = &button_mem[bi];
@@ -117,6 +120,7 @@ void btn_process(void) {
                         BTN_PRESSED : BTN_RELEASED;
                     this_mem->state_is_new = true;
                     this_mem->held_timer = BTN_HELD_TIME;
+                    some_state_was_updated = true;
                 }
             }
         } else {
@@ -134,9 +138,16 @@ void btn_process(void) {
                 if (this_mem->held_timer == 0) {
                     this_mem->state = BTN_HELD;
                     this_mem->state_is_new = true;
+                    some_state_was_updated = true;
                 }
             }
         }
+    }
+
+    // the system job cares about button state changes
+    if (some_state_was_updated) {
+        // schedule it so it can do something in response
+        job_schedule(JOB_SYSTEM);
     }
 }
 

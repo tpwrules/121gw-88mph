@@ -98,7 +98,4 @@ void timer_handle_job_10ms_timer(void) {
     btn_process();
 
     lcd_10ms_update_if_necessary();
-
-    // the system job is surely interested in what's changed as a result
-    job_schedule(JOB_SYSTEM);
 }
