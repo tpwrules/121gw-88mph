@@ -65,6 +65,9 @@ typedef struct {
     // one count -> one least significant digit display
     // thus the reading can be 1000 times more precise in calculations
     int32_t millicounts;
+    // the milliseconds the reading was taken at
+    // used for logging purposes
+    uint32_t time_ms;
     // the base unit of the reading
     rdg_unit_t unit;
     // the unit's exponent and decimal position

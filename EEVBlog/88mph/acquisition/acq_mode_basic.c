@@ -24,7 +24,7 @@
 #include "acquisition/acq_modes.h"
 #include "acquisition/acquisition.h"
 #include "acquisition/reading.h"
-
+#include "system/timer.h"
 #include "hardware/hy3131.h"
 
 // registers for volts dc
@@ -72,6 +72,7 @@ void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
             reading_t reading = {
                 // approximately calibrate by dividing by 60
                 (ad1*100)/6, // millicounts
+                timer_1ms_ticks, // time_ms
                 RDG_UNIT_VOLTS, // unit
                 RDG_EXPONENT_NONE, // exponent
                 // conveniently, decimal point loc is the same as the submode
