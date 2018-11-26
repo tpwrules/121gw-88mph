@@ -35,7 +35,7 @@ void meas_mode_func_volts_dc(meas_event_t event, reading_t* reading) {
 
         case MEAS_EVENT_NEW_ACQ: {
             // just pass it through
-            meas_set_reading(0, *reading);
+            meas_put_reading(reading);
             break;
         }
 

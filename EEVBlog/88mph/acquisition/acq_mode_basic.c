@@ -54,6 +54,8 @@ void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
             // starting and setting submodes is the same
             // disable chip interrupts so we don't get re-entered
             hy_enable_irq(false);
+            // clear acquisitions that aren't for this mode
+            acq_clear_readings();
             // program new register set into the HY3131
             submode = (acq_submode_t)value;
             hy_write_regs(0x20, 20,
@@ -80,8 +82,8 @@ void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
                 RDG_KIND_MAIN // kind
             };
 
-            // tell the new reading to the rest of the acquisition engine
-            acq_set_reading(0, reading);
+            // tell the new reading to the measurement engine
+            acq_put_reading(&reading);
             break;
         }
 

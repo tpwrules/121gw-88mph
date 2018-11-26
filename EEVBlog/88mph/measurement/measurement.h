@@ -36,13 +36,15 @@ void meas_handle_job_measurement(void);
 // set the measurement mode
 void meas_set_mode(meas_mode_t mode);
 
-// handle the measured values
-// there are 4 available readings
-// which one is which depends on the mode
-void meas_set_reading(int which, reading_t reading);
-// returns false if the reading isn't new
-// if it is new, returns true and puts it in reading
-bool meas_get_reading(int which, reading_t* reading);
+// there is a queue of measured values, effectively between the measurement
+// job and the system job
+// put a reading into the queue. if there is no space it's just dropped
+void meas_put_reading(reading_t* reading);
+// get a reading from the queue. returns false if there is no reading to get.
+// else puts the reading into reading and returns true
+bool meas_get_reading(reading_t* reading);
+// empty the queue of all readings
+void meas_clear_readings(void);
 
 void meas_mode_func_off(meas_event_t event, reading_t* reading);
 

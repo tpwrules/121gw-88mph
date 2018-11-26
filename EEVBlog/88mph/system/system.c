@@ -65,10 +65,15 @@ void sys_handle_job_system(void) {
     static button_t curr_state = BTN_RELEASED;
 
     reading_t reading;
+    bool got_new_reading = false;
+    // get the latest reading
+    while (meas_get_reading(&reading)) {
+        got_new_reading = true;
+    }
 
-    if (meas_get_reading(0, &reading)) {
+    // and put it on the screen
+    if (got_new_reading) {
         lcd_put_reading(LCD_SCREEN_MAIN, reading);
-
         lcd_queue_update();
     }
 
@@ -90,8 +95,5 @@ void sys_handle_job_system(void) {
         RDG_DECIMAL_10000, // decimal
         RDG_KIND_MAIN // kind
     };
-    r.millicounts = ((int32_t)curr_button) * 1000;
-    r.millicounts += ((int32_t)curr_state) * 100000;
-    r.millicounts += ((int32_t)btn_get_rsw()) * 1000000;
     lcd_put_reading(LCD_SCREEN_SUB, r);
 }

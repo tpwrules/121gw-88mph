@@ -42,13 +42,15 @@ void acq_set_int_mask(uint8_t mask);
 void acq_set_mode(acq_mode_t mode, acq_submode_t submode);
 void acq_set_submode(acq_submode_t submode);
 
-// handle the acquired values
-// there are 4 available readings
-// which one is which depends on the mode
-void acq_set_reading(int which, reading_t reading);
-// returns false if the reading isn't new
-// if it is new, returns true and puts it in reading
-bool acq_get_reading(int which, reading_t* reading);
+// there is a queue of acquired values, effectively between the acquisition
+// job and the measurement job
+// put a reading into the queue. if there is no space it's just dropped
+void acq_put_reading(reading_t* reading);
+// get a reading from the queue. returns false if there is no reading to get.
+// else puts the reading into reading and returns true
+bool acq_get_reading(reading_t* reading);
+// empty the queue of all readings
+void acq_clear_readings(void);
 
 void acq_mode_func_misc(acq_event_t event, int64_t value);
 

@@ -115,28 +115,57 @@ void acq_set_submode(acq_submode_t submode) {
     curr_acq_mode_func(ACQ_EVENT_SET_SUBMODE, (int64_t)submode);
 }
 
-static reading_t curr_readings[4];
-static bool is_reading_new[4] = {false, false, false, false};
+// must be power of 2!!
+#define ACQ_READING_QUEUE_SIZE (8)
 
-void acq_set_reading(int which, reading_t reading) {
-    // don't bother to turn off interrupts cause there's nothing
-    // higher priority that would interrupt this
-    curr_readings[which] = reading;
-    is_reading_new[which] = true;
-    // the measurement job is likely interested in the new acquisition
+#define Q_MASK (ACQ_READING_QUEUE_SIZE-1)
+
+static volatile reading_t queue[ACQ_READING_QUEUE_SIZE];
+static volatile int q_head = 0;
+static volatile int q_tail = 0;
+
+// put a reading into the queue. if there is no space it's just dropped
+void acq_put_reading(reading_t* reading) {
+    // can be called from any job, so protect ourselves!
+    __disable_irq();
+    // buffer head cause it's volatile
+    // but we know we can't get interrupted
+    int q_h = q_head;
+    if (((q_h+1)&Q_MASK) != q_tail) {
+        // we have space
+        queue[q_h] = *reading;
+        q_head = (q_h+1) & Q_MASK;
+    }
+    __enable_irq();
+
+    // the measurement engine is certainly interested in this new reading
     job_schedule(JOB_MEASUREMENT);
 }
 
-bool acq_get_reading(int which, reading_t* reading) {
-    // it might get set from the hy interrupt
+// get a reading from the queue. returns false if there is no reading to get.
+// else puts the reading into reading and returns true
+bool acq_get_reading(reading_t* reading) {
+    // can be called from any job, so protect ourselves!
     __disable_irq();
-    bool its_new = is_reading_new[which];
-    if (its_new) {
-        is_reading_new[which] = false;
-        *reading = curr_readings[which];
+    // buffer tail cause it's volatile
+    // but we know we can't get interrupted
+    int q_t = q_tail;
+    bool there_is_a_reading = (q_head != q_t);
+    if (there_is_a_reading) {
+        *reading = queue[q_t];
+        q_tail = (q_t+1) & Q_MASK;
     }
     __enable_irq();
-    return its_new;
+    return there_is_a_reading;
+}
+
+// empty the queue of all readings
+void acq_clear_readings(void) {
+    // can be called from any job, so protect ourselves!
+    __disable_irq();
+    q_head = 0;
+    q_tail = 0;
+    __enable_irq();
 }
 
 // misc mode handler
@@ -144,4 +173,5 @@ void acq_mode_func_misc(acq_event_t event, int64_t value) {
     // for now, all this mode should be doing is turning off
     hy_disable_irq();
     acq_set_int_mask(0);
+    acq_clear_readings();
 }
