@@ -76,7 +76,8 @@ void acq_mode_func_volts_dc(acq_event_t event, int64_t value) {
                 RDG_UNIT_VOLTS, // unit
                 RDG_EXPONENT_NONE, // exponent
                 // conveniently, decimal point loc is the same as the submode
-                submode // decimal point
+                submode, // decimal point
+                RDG_KIND_MAIN // kind
             };
 
             // tell the new reading to the rest of the acquisition engine

@@ -87,7 +87,8 @@ void sys_handle_job_system(void) {
         0, // time_ms
         RDG_UNIT_NONE, // unit
         RDG_EXPONENT_NONE, // exponent
-        RDG_DECIMAL_10000 // decimal
+        RDG_DECIMAL_10000, // decimal
+        RDG_KIND_MAIN // kind
     };
     r.millicounts = ((int32_t)curr_button) * 1000;
     r.millicounts += ((int32_t)curr_state) * 100000;

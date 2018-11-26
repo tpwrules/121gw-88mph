@@ -60,6 +60,11 @@ typedef enum {
     RDG_DECIMAL_10000 // no decimal
 } rdg_decimal_t;
 
+// this controls the reading's kind, and thus its fate
+typedef enum {
+    RDG_KIND_MAIN, // main screen reading
+} rdg_kind_t;
+
 typedef struct {
     // the value of the reading
     // one count -> one least significant digit display
@@ -76,6 +81,8 @@ typedef struct {
     // values here
     rdg_exponent_t exponent;
     rdg_decimal_t decimal;
+    // what the reading's purpose is in life
+    rdg_kind_t kind;
 } reading_t;
 
 #endif
