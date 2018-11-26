@@ -16,25 +16,33 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
-#ifndef SYSTEM_TIMER_H
-#define SYSTEM_TIMER_H
-
 #include <stdint.h>
 
-// this file handles the two system timers
-// 1ms and 10ms
+#include "measurement/meas_mode_basic.h"
 
-void timer_init(void);
-void timer_deinit(void);
+#include "measurement/measurement.h"
+#include "measurement/meas_modes.h"
+#include "acquisition/acquisition.h"
+#include "acquisition/reading.h"
 
-// callback for 1ms timer
-void HAL_SYSTICK_Callback(void);
-// callback for 10ms timer
-void timer_handle_job_10ms_timer(void);
+void meas_mode_func_volts_dc(meas_event_t event, reading_t* reading) {
+    switch (event) {
+        case MEAS_EVENT_START: {
+            // switch the acquisition engine to the correct mode
+            acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d0000);
+            break;
+        }
 
-// number of milliseconds since timer was inited
-extern volatile uint32_t timer_1ms_ticks;
-// number of 10 millisecond periods since timer was inited
-extern volatile uint32_t timer_10ms_ticks;
+        case MEAS_EVENT_NEW_ACQ: {
+            // just pass it through
+            meas_set_reading(0, *reading);
+            break;
+        }
 
-#endif
+        default: {
+            // if we get stopped, we can rely on the next guy to 
+            // switch acquisition mode and stuff correctly
+            break;
+        }
+    }
+}

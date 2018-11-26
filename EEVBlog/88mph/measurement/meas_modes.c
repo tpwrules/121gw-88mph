@@ -16,25 +16,16 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
-#ifndef SYSTEM_TIMER_H
-#define SYSTEM_TIMER_H
+// pointers to the measurement mode functions
 
-#include <stdint.h>
+#include "measurement/meas_modes.h"
 
-// this file handles the two system timers
-// 1ms and 10ms
+#include "measurement/measurement.h"
+#include "measurement/meas_mode_basic.h"
 
-void timer_init(void);
-void timer_deinit(void);
-
-// callback for 1ms timer
-void HAL_SYSTICK_Callback(void);
-// callback for 10ms timer
-void timer_handle_job_10ms_timer(void);
-
-// number of milliseconds since timer was inited
-extern volatile uint32_t timer_1ms_ticks;
-// number of 10 millisecond periods since timer was inited
-extern volatile uint32_t timer_10ms_ticks;
-
-#endif
+const meas_mode_func meas_mode_funcs[2] = {
+    // MEAS_MODE_OFF
+    meas_mode_func_off,
+    // MEAS_MODE_VOLTS_DC
+    meas_mode_func_volts_dc
+};

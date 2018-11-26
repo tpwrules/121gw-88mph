@@ -34,7 +34,8 @@ typedef enum {
     // its handler is in hardware/hy3131.c
     JOB_ACQUISITION = EXTI3_IRQn,
     JOB_10MS_TIMER = TIM6_IRQn,
-    JOB_SYSTEM = USB_HP_IRQn
+    JOB_SYSTEM = USB_HP_IRQn,
+    JOB_MEASUREMENT = USB_LP_IRQn
 } job_t;
 
 // configure the NVIC for everything, but don't enable any of the jobs
@@ -61,5 +62,8 @@ void USB_HP_IRQHandler(void);
 
 // JOB_10MS_TIMER
 void TIM6_IRQHandler(void);
+
+// JOB_MEASUREMENT
+void USB_LP_IRQHandler(void);
 
 #endif

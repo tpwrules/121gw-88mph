@@ -16,25 +16,34 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
-#ifndef SYSTEM_TIMER_H
-#define SYSTEM_TIMER_H
+#ifndef MEASUREMENT_MEASUREMENT_H
+#define MEASUREMENT_MEASUREMENT_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
-// this file handles the two system timers
-// 1ms and 10ms
+#include "measurement/meas_modes.h"
+#include "acquisition/reading.h"
 
-void timer_init(void);
-void timer_deinit(void);
+// turn on the measurement engine
+void meas_init(void);
+// turn off the measurement engine
+void meas_deinit(void);
 
-// callback for 1ms timer
-void HAL_SYSTICK_Callback(void);
-// callback for 10ms timer
-void timer_handle_job_10ms_timer(void);
+// do the measurement job
+void meas_handle_job_measurement(void);
 
-// number of milliseconds since timer was inited
-extern volatile uint32_t timer_1ms_ticks;
-// number of 10 millisecond periods since timer was inited
-extern volatile uint32_t timer_10ms_ticks;
+// set the measurement mode
+void meas_set_mode(meas_mode_t mode);
+
+// handle the measured values
+// there are 4 available readings
+// which one is which depends on the mode
+void meas_set_reading(int which, reading_t reading);
+// returns false if the reading isn't new
+// if it is new, returns true and puts it in reading
+bool meas_get_reading(int which, reading_t* reading);
+
+void meas_mode_func_off(meas_event_t event, reading_t* reading);
 
 #endif

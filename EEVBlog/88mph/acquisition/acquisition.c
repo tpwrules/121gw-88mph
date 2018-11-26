@@ -123,8 +123,8 @@ void acq_set_reading(int which, reading_t reading) {
     // higher priority that would interrupt this
     curr_readings[which] = reading;
     is_reading_new[which] = true;
-    // the system job is likely interested in the new reading
-    job_schedule(JOB_SYSTEM);
+    // the measurement job is likely interested in the new acquisition
+    job_schedule(JOB_MEASUREMENT);
 }
 
 bool acq_get_reading(int which, reading_t* reading) {

@@ -26,14 +26,16 @@
 #include "system/timer.h"
 #include "hardware/lcd.h"
 #include "hardware/buttons.h"
+#include "measurement/measurement.h"
+#include "measurement/meas_modes.h"
 #include "acquisition/acquisition.h"
-#include "acquisition/acq_modes.h"
 #include "acquisition/reading.h"
 
 void sys_main_loop(void) {
     __enable_irq();
     job_init();
     acq_init();
+    meas_init();
     timer_init();
 
     // enable all the jobs so the system starts working
@@ -42,10 +44,10 @@ void sys_main_loop(void) {
     __disable_irq();
     job_enable(JOB_10MS_TIMER);
     job_enable(JOB_SYSTEM);
+    job_enable(JOB_MEASUREMENT);
     __enable_irq();
 
-    // the acquisition job will be enabled in here
-    acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d0000);
+    meas_set_mode(MEAS_MODE_VOLTS_DC);
 
     while (1) {
         // the main loop just sleeps
@@ -58,20 +60,13 @@ void sys_main_loop(void) {
 void sys_handle_job_system(void) {
     // the system job basically does the UI
     // and routes around measurements
-    static int submode = 0;
 
     static button_t curr_button = BTN_NONE;
     static button_t curr_state = BTN_RELEASED;
 
-    int new_submode = (HAL_GetTick()/1000)%4;
-    if (submode != new_submode) {
-        submode = new_submode;
-        acq_set_submode(submode);
-    }
-
     reading_t reading;
 
-    if (acq_get_reading(0, &reading)) {
+    if (meas_get_reading(0, &reading)) {
         lcd_put_reading(LCD_SCREEN_MAIN, reading);
 
         lcd_queue_update();

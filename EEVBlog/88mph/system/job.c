@@ -39,6 +39,8 @@ void job_init(void) {
 
     // after the timers, handling acquisition is the most important
     NVIC_SetPriority(JOB_ACQUISITION, 5);
+    // measurement is closely related to acquisition
+    NVIC_SetPriority(JOB_MEASUREMENT, 7);
 
     // then the system job
     // it keeps the UI responsive
@@ -54,6 +56,7 @@ void job_deinit(void) {
     __disable_irq();
     job_disable(JOB_SYSTEM);
     job_disable(JOB_10MS_TIMER);
+    job_disable(JOB_MEASUREMENT);
     __enable_irq();
 }
 
@@ -89,4 +92,10 @@ void USB_HP_IRQHandler(void) {
 #include "system/timer.h"
 void TIM6_IRQHandler(void) {
     timer_handle_job_10ms_timer();
+}
+
+// JOB_MEASUREMENT
+#include "measurement/measurement.h"
+void USB_LP_IRQHandler(void) {
+    meas_handle_job_measurement();
 }

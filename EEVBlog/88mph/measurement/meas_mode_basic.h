@@ -16,25 +16,15 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
-#ifndef SYSTEM_TIMER_H
-#define SYSTEM_TIMER_H
+#ifndef MEASUREMENT_MEAS_MODE_BASIC_H
+#define MEASUREMENT_MEAS_MODE_BASIC_H
 
-#include <stdint.h>
+#include "measurement/meas_modes.h"
+#include "acquisition/reading.h"
 
-// this file handles the two system timers
-// 1ms and 10ms
+// this file defines the measurement mode funcs for the boring modes
+// volts, etc
 
-void timer_init(void);
-void timer_deinit(void);
-
-// callback for 1ms timer
-void HAL_SYSTICK_Callback(void);
-// callback for 10ms timer
-void timer_handle_job_10ms_timer(void);
-
-// number of milliseconds since timer was inited
-extern volatile uint32_t timer_1ms_ticks;
-// number of 10 millisecond periods since timer was inited
-extern volatile uint32_t timer_10ms_ticks;
+void meas_mode_func_volts_dc(meas_event_t event, reading_t* reading);
 
 #endif

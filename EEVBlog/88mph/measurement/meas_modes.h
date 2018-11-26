@@ -16,25 +16,38 @@
  *  limitations under the License.                                           *
  *****************************************************************************/
 
-#ifndef SYSTEM_TIMER_H
-#define SYSTEM_TIMER_H
+#ifndef MEASUREMENT_MEAS_MODES_H
+#define MEASUREMENT_MEAS_MODES_H
 
 #include <stdint.h>
 
-// this file handles the two system timers
-// 1ms and 10ms
+#include "acquisition/reading.h"
 
-void timer_init(void);
-void timer_deinit(void);
+// this file defines the measurement modes
+// the corresponding .c has a table with function pointers to the mode handlers
+// keep the ordering of these options the same!
 
-// callback for 1ms timer
-void HAL_SYSTICK_Callback(void);
-// callback for 10ms timer
-void timer_handle_job_10ms_timer(void);
+typedef enum {
+    MEAS_MODE_OFF=0,
+    MEAS_MODE_VOLTS_DC
+} meas_mode_t;
 
-// number of milliseconds since timer was inited
-extern volatile uint32_t timer_1ms_ticks;
-// number of 10 millisecond periods since timer was inited
-extern volatile uint32_t timer_10ms_ticks;
+// we also need to define the mode function
+typedef enum {
+    // these are called from the system job
+    // begin measuring, reading is null
+    MEAS_EVENT_START=0,
+    // end measuring, reading is null
+    MEAS_EVENT_STOP,
+
+    // these are called from the measurement job
+    // the acquisition engine has a new reading
+    MEAS_EVENT_NEW_ACQ
+} meas_event_t;
+
+typedef void (*meas_mode_func)(meas_event_t event, reading_t* reading);
+
+extern const meas_mode_func meas_mode_funcs[2];
+
 
 #endif
