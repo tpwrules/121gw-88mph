@@ -69,9 +69,26 @@ void job_enable(job_t job) {
     NVIC_EnableIRQ((IRQn_Type)job);
 }
 
+// resume a specific job by enabling it but not un-scheduling it
+// only resumes if resume is true. otherwise, does nothing
+void job_resume(job_t job, bool resume) {
+    if (resume) {
+        NVIC_EnableIRQ((IRQn_Type)job);
+    }
+}
+
 // disable a specific job, so it won't run even if it is scheduled
-void job_disable(job_t job) {
+// returns whether or not the job was previously enabled
+// (to be used with resume)
+bool job_disable(job_t job) {
+    __disable_irq();
+    // this horrifying expression was mostly copied and pasted from CMSIS
+    bool was_enabled = 
+        NVIC->ISER[(((uint32_t)(int32_t)job) >> 5UL)] &
+        (uint32_t)(1UL << (((uint32_t)(int32_t)job) & 0x1FUL));
     NVIC_DisableIRQ((IRQn_Type)job);
+    __enable_irq();
+    return was_enabled;
 }
 
 // schedule a specific job, so it will run if it scheduled and no

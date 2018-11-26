@@ -41,6 +41,7 @@ void meas_deinit(void) {
     meas_set_mode(MEAS_MODE_OFF);
     // and cancel out the meas function
     curr_meas_mode_func = 0;
+    job_disable(JOB_MEASUREMENT);
 }
 
 // do the measurement job
@@ -56,12 +57,16 @@ void meas_handle_job_measurement(void) {
 
 // set the measurement mode
 void meas_set_mode(meas_mode_t mode) {
+    // stop measurement job from catching us in a weird spot
+    bool meas_enabled = job_disable(JOB_MEASUREMENT);
     // turn off the current mode
     curr_meas_mode_func(MEAS_EVENT_STOP, NULL);
     // figure out which mode func goes with this mode
     curr_meas_mode_func = meas_mode_funcs[mode];
     // and start it up
     curr_meas_mode_func(MEAS_EVENT_START, NULL);
+    // let the measurement job do its thing
+    job_resume(JOB_MEASUREMENT, meas_enabled);
 }
 
 // must be power of 2!!

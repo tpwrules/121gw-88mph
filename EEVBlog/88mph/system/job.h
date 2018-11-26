@@ -48,8 +48,14 @@ void job_deinit(void);
 // this un-schedules the job before enabling it
 void job_enable(job_t job);
 
+// resume a specific job by enabling it but not un-scheduling it
+// only resumes if resume is true. otherwise, does nothing
+void job_resume(job_t job, bool resume);
+
 // disable a specific job, so it won't run even if it is scheduled
-void job_disable(job_t job);
+// returns whether or not the job was previously enabled
+// (to be used with resume)
+bool job_disable(job_t job);
 
 // schedule a specific job, so it will run if it scheduled and no
 // higher priority job is running. this will only run the job once!

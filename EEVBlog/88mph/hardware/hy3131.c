@@ -26,6 +26,27 @@
 #include "system/job.h"
 #include "acquisition/acquisition.h"
 
+static void check_irq_line(void) {
+    // the EXTI interrupt line is edge-sensitive
+    // so if we turn on interrupts while the HY has already asserted
+    // the interrupt line, we will never catch it
+    // also, communicating with the HY will wiggle the DO line and trigger
+    // spurious interrupts
+
+    __disable_irq();
+    // clear pending and perhaps fake EXTI interrupt
+    EXTI->PR = EXTI_PR_PR3;
+    // clear pending NVIC interrupt that would have happened as a result
+    NVIC_ClearPendingIRQ((IRQn_Type)JOB_ACQUISITION);
+    // check if the interrupt line is asserted
+    if (GPIO_PINGET(HY_DO)) {
+        // if it is, manually assert the interrupt in EXTI
+        // as if it had seen the edge
+        EXTI->SWIER = EXTI_SWIER_SWIER3;
+    }
+    __enable_irq();
+}
+
 void hy_init(void) {
     // set up the interrupt handler
     // the chip DO line is connected to PF3, so it's on the EXTI3 line
@@ -43,14 +64,17 @@ void hy_init(void) {
 
     // and unmask the interrupt so the NVIC sees it
     SET_BIT(EXTI->IMR, EXTI_IMR_MR3);
+
+    // finally, clear the interrupt mask inside the chip
+    // this will also properly set up the interrupt state
+    uint8_t mask = 0;
+    hy_write_regs(HY_REG_INTE, 1, &mask);
 }
 
 void hy_deinit(void) {
-    hy_enable_irq(false);
+    job_disable(JOB_ACQUISITION);
 }
 
-
-static volatile bool irq_enabled = false;
 
 // chip interrupt is connected to EXTI3
 void EXTI3_IRQHandler(void) {
@@ -60,36 +84,6 @@ void EXTI3_IRQHandler(void) {
     // it's time to do the job, probably because the HY bothered us
     acq_handle_job_acquisition();
 }
-
-void hy_enable_irq(bool enable) {
-    if (!enable) return;
-
-    __disable_irq();
-    irq_enabled = true;
-    // clear any pending interrupt in the EXTI
-    EXTI->PR = EXTI_PR_PR3;
-    // enable the job so we get notified again
-    job_enable(JOB_ACQUISITION);
-    // check to see if the chip currently is trying to interrupt us
-    if (GPIO_PINGET(HY_DO)) {
-        // if it is, the input is edge-triggered and we just cleared it,
-        // so we have to trigger the interrupt in software since the
-        // input won't see the edge again
-        job_schedule(JOB_ACQUISITION);
-    }
-    __enable_irq();
-}
-
-bool hy_disable_irq(void) {
-    __disable_irq();
-    bool previous = irq_enabled;
-    irq_enabled = false;
-    // disable the job so we don't get bothered
-    job_disable(JOB_ACQUISITION);
-    __enable_irq();
-    return previous;
-}
-
 
 // just wait some time to let setup and hold delays happen
 static void spinloop(uint32_t times) {
@@ -129,7 +123,7 @@ void hy_read_regs(uint8_t start, uint8_t count, uint8_t* data) {
     // we have to turn off interrupts while doing this
     // because the chip will be wiggling DO and making spurious interrupts
     // all over the place
-    bool prev = hy_disable_irq();
+    bool acq_enabled = job_disable(JOB_ACQUISITION);
 
     // assert chip select
     GPIO_PINRST(HY_CS);
@@ -149,8 +143,11 @@ void hy_read_regs(uint8_t start, uint8_t count, uint8_t* data) {
     GPIO_PINSET(HY_CS);
     // wait for DO to stabilize once CS is deasserted
     spinloop(1);
-    // and configure interrupts how they were
-    hy_enable_irq(prev);
+
+    // clear spurious interrupts, but listen to the HY if it wants us
+    check_irq_line();
+    // configure the job how it was
+    job_resume(JOB_ACQUISITION, acq_enabled);
 }
 
 // write a series of registers to the chip
@@ -158,7 +155,7 @@ void hy_write_regs(uint8_t start, uint8_t count, const uint8_t* data) {
     // we have to turn off interrupts while doing this
     // because the chip will be wiggling DO and making spurious interrupts
     // all over the place
-    bool prev = hy_disable_irq();
+    bool acq_enabled = job_disable(JOB_ACQUISITION);
 
     // assert chip select
     GPIO_PINRST(HY_CS);
@@ -176,6 +173,9 @@ void hy_write_regs(uint8_t start, uint8_t count, const uint8_t* data) {
     GPIO_PINRST(HY_DI);
     // wait for DO to stabilize once CS is deasserted
     spinloop(1);
-    // and configure interrupts how they were
-    hy_enable_irq(prev);
+
+    // clear spurious interrupts, but listen to the HY if it wants us
+    check_irq_line();
+    // configure the job how it was
+    job_resume(JOB_ACQUISITION, acq_enabled);
 }

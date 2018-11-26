@@ -33,14 +33,12 @@ typedef enum {
 } meas_mode_t;
 
 // we also need to define the mode function
+// this function will not be re-entered
 typedef enum {
-    // these are called from the system job
     // begin measuring, reading is null
     MEAS_EVENT_START=0,
     // end measuring, reading is null
     MEAS_EVENT_STOP,
-
-    // these are called from the measurement job
     // the acquisition engine has a new reading
     MEAS_EVENT_NEW_ACQ
 } meas_event_t;

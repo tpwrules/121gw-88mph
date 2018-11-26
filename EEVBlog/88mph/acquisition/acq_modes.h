@@ -42,16 +42,14 @@ typedef enum {
 } acq_submode_t;
 
 // we also need to define the mode function
+// this function will not be re-entered
 typedef enum {
-    // these are called from the system job
     // begin acquiring, value is initial submode
     ACQ_EVENT_START=0,
     // stop acquiring, value is meaningless
     ACQ_EVENT_STOP,
     // switch submodes, value is new submode
     ACQ_EVENT_SET_SUBMODE,
-
-    // these are called from the acquisition job
     // new measurement available, value is new measurement
     ACQ_EVENT_NEW_AD1
 } acq_event_t;

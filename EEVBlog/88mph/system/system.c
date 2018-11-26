@@ -45,6 +45,7 @@ void sys_main_loop(void) {
     job_enable(JOB_10MS_TIMER);
     job_enable(JOB_SYSTEM);
     job_enable(JOB_MEASUREMENT);
+    job_enable(JOB_ACQUISITION);
     __enable_irq();
 
     meas_set_mode(MEAS_MODE_VOLTS_DC);

@@ -42,12 +42,13 @@ void acq_init(void) {
     // who knows if this is necessary, but it feels good
     HAL_Delay(10);
     // initialize it
+    curr_int_mask = 0;
     hy_init();
     // switch to the 'off' mode manually
     // cause there should be no previous mode func to call
     curr_acq_mode_func = acq_mode_funcs[ACQ_MODE_MISC];
     curr_acq_mode_func(ACQ_EVENT_START, (int64_t)ACQ_MODE_MISC_SUBMODE_OFF);
-    // the off mode turns off the HY interrupts
+    // the off mode tells the HY to not send us interrupts
 }
 
 // turn off the acquisition engine
@@ -89,30 +90,38 @@ void acq_handle_job_acquisition(void) {
 }
 
 void acq_set_int_mask(uint8_t mask) {
-    // disable interrupts around this so curr_int_mask isn't wrong
-    bool prev = hy_disable_irq();
+    // disable the job around this so curr_int_mask isn't wrong
+    bool acq_enabled = job_disable(JOB_ACQUISITION);
     curr_int_mask = mask;
     // the caller probably is changing the int mask because they've reconfigured
     // the chip, so clear pending interrupts from the chip first
-    uint8_t whatever;
-    hy_read_regs(HY_REG_INTF, 1, &whatever);
+    if (mask) {
+        uint8_t whatever;
+        hy_read_regs(HY_REG_INTF, 1, &whatever);
+    }
     // now enable the interrupts the user wanted
     hy_write_regs(HY_REG_INTE, 1, &mask);
-    // and start listening for them
-    hy_enable_irq(prev);
+    // and turn on the job again so they get handled
+    job_resume(JOB_ACQUISITION, acq_enabled);
 }
 
 void acq_set_mode(acq_mode_t mode, acq_submode_t submode) {
+    // the acq job might try to interrupt us during this process, so pause it
+    bool acq_enabled = job_disable(JOB_ACQUISITION);
     // turn off the current mode
     curr_acq_mode_func(ACQ_EVENT_STOP, 0);
     // figure out which mode func goes with this mode
     curr_acq_mode_func = acq_mode_funcs[mode];
     // and start it up
     curr_acq_mode_func(ACQ_EVENT_START, (int64_t)submode);
+    job_resume(JOB_ACQUISITION, acq_enabled);
 }
 
 void acq_set_submode(acq_submode_t submode) {
+    // the acq job might try to interrupt us during this process, so pause it
+    bool acq_enabled = job_disable(JOB_ACQUISITION);
     curr_acq_mode_func(ACQ_EVENT_SET_SUBMODE, (int64_t)submode);
+    job_resume(JOB_ACQUISITION, acq_enabled);
 }
 
 // must be power of 2!!
@@ -171,7 +180,6 @@ void acq_clear_readings(void) {
 // misc mode handler
 void acq_mode_func_misc(acq_event_t event, int64_t value) {
     // for now, all this mode should be doing is turning off
-    hy_disable_irq();
     acq_set_int_mask(0);
     acq_clear_readings();
 }

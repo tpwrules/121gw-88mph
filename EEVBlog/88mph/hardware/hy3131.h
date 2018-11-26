@@ -66,15 +66,6 @@ void hy_deinit(void);
 // the EXTI3 interrupt is triggered when the chip asserts its IRQ
 void EXTI3_IRQHandler(void);
 
-// turn on and off processing the IRQ from the chip
-
-// enable IRQs only if enable is true
-// if enable is false, the IRQ state is not changed
-void hy_enable_irq(bool enable);
-// disable IRQs. previous IRQ state is returned
-bool hy_disable_irq(void);
-
-
 // read a series of registers from the chip
 void hy_read_regs(uint8_t start, uint8_t count, uint8_t* data);
 // write a series of registers to the chip
