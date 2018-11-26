@@ -26,16 +26,32 @@
 #include "acquisition/reading.h"
 
 void meas_mode_func_volts_dc(meas_event_t event, reading_t* reading) {
+    // average over 8 acquisitions
+    static int avg_buf = 0;
+    static int acqs = 0;
+
     switch (event) {
         case MEAS_EVENT_START: {
+            // clear the average buffer
+            avg_buf = 0;
+            acqs = 0;
             // switch the acquisition engine to the correct mode
             acq_set_mode(ACQ_MODE_VOLTS_DC, ACQ_MODE_VOLTS_DC_SUBMODE_5d0000);
             break;
         }
 
         case MEAS_EVENT_NEW_ACQ: {
-            // just pass it through
-            meas_put_reading(reading);
+            // accumulate it in the average
+            avg_buf += reading->millicounts;
+            acqs += 1;
+            // every 8, pass it on to the system
+            if (acqs == 8) {
+                acqs = 0;
+                // reuse the reading since all the other parameters are the same
+                reading->millicounts = avg_buf/8;
+                avg_buf = 0;
+                meas_put_reading(reading);
+            }
             break;
         }
 
